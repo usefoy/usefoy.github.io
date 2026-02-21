@@ -22,23 +22,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Build job
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 2.7  # Make sure this matches the Ruby version you’re using locally
+          bundler-cache: true  # This will cache your gems for faster builds
+
+      - name: Install dependencies
+        run: |
+          gem install bundler
+          bundle install  # This installs the gems from the Gemfile, including jekyll-theme-chirpy
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
+
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./blog
-          destination: ./_site
+          source: ./blog   # Build from the 'blog' directory
+          destination: ./_site  # Output to _site directory
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
-  # Deployment job
   deploy:
     environment:
       name: github-pages
