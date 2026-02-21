@@ -1,20 +1,22 @@
-name: Deploy Jekyll with GitHub Pages (Subfolder: blog)
+# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+name: Deploy Jekyll with GitHub Pages dependencies preinstalled
 
 on:
-  # Trigger the workflow on pushes to the default branch
+  # Runs on pushes targeting the default branch
   push:
     branches: ["main"]
 
-  # Allow manual trigger via the GitHub Actions tab
+  # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
-# Set permissions for deployment
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Ensure only one deployment runs at a time
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -24,22 +26,19 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
-
       - name: Setup Pages
         uses: actions/configure-pages@v5
-
       - name: Build with Jekyll
         uses: actions/jekyll-build-pages@v1
         with:
-          source: ./blog  # Build the blog from the 'blog' subfolder
+          source: ./
           destination: ./_site
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
 
-  # Deploy job
+  # Deployment job
   deploy:
     environment:
       name: github-pages
@@ -50,6 +49,5 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          # Deploy from the '_site' folder where Jekyll has built the site
-          folder: _site
+
+the blog is in a subfoolder named https://usefoy.github.io/blog/
