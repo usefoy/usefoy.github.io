@@ -1,0 +1,1407 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>تقدر تشغّل؟ — Can My Device Run AI?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080808;
+  --s1: #101010;
+  --s2: #181818;
+  --s3: #202020;
+  --b1: #1e1e1e;
+  --b2: #2a2a2a;
+  --b3: #363636;
+  --t1: #f0f0f0;
+  --t2: #909090;
+  --t3: #555;
+  --t4: #333;
+  --acc: #d4ff47;
+  --acc2: #ff5e3a;
+  --cs: #22c55e; --ca: #84cc16; --cb: #eab308; --cc: #f97316; --cd: #ef4444; --cf: #52525b;
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'IBM Plex Sans Arabic', sans-serif;
+  --disp: 'Syne', sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--t1);font-family:var(--sans);font-size:13px;line-height:1.6;min-height:100vh}
+body.ltr{direction:ltr}
+
+/* GRID BG */
+body::after{content:'';position:fixed;inset:0;background-image:linear-gradient(var(--b1) 1px,transparent 1px),linear-gradient(90deg,var(--b1) 1px,transparent 1px);background-size:48px 48px;pointer-events:none;z-index:0;opacity:.4}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:200;background:rgba(8,8,8,.93);backdrop-filter:blur(20px);border-bottom:1px solid var(--b1);display:flex;align-items:center;justify-content:space-between;padding:0 20px;height:48px}
+.nav-brand{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--acc);text-decoration:none;letter-spacing:-.5px;cursor:pointer}
+.nav-links{display:flex;gap:2px;align-items:center}
+.nav-link{color:var(--t3);text-decoration:none;font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:3px;border:1px solid transparent;transition:.15s;cursor:pointer;background:none;letter-spacing:.3px}
+.nav-link:hover,.nav-link.active{color:var(--t1);border-color:var(--b2)}
+.nav-link.active{color:var(--acc)}
+.lang-btn{color:var(--t2);border-color:var(--b2)!important;font-size:10px;letter-spacing:1px;margin-right:4px}
+body.ltr .lang-btn{margin-right:0;margin-left:4px}
+
+/* PAGES */
+.page{display:none;position:relative;z-index:1}
+.page.active{display:block}
+
+/* ── HOME PAGE ── */
+.hero{max-width:800px;margin:0 auto;padding:56px 20px 36px;text-align:center}
+.hero-tag{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--acc);letter-spacing:2px;border:1px solid rgba(212,255,71,.25);padding:3px 10px;border-radius:2px;margin-bottom:18px;text-transform:uppercase}
+h1{font-size:clamp(32px,5.5vw,60px);font-weight:800;line-height:1.05;letter-spacing:-2px;margin-bottom:12px}
+h1 em{color:var(--acc);font-style:normal}
+.hero-sub{font-size:14px;color:var(--t2);max-width:440px;margin:0 auto 32px}
+
+/* HW CARD */
+.hw-wrap{max-width:800px;margin:0 auto 28px;padding:0 20px}
+.hw-card{background:var(--s1);border:1px solid var(--b1);border-radius:6px;overflow:hidden}
+.hw-top{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b1)}
+.hw-label{font-family:var(--mono);font-size:10px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.hw-status{display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--t3)}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--acc);animation:blink 1.2s ease-in-out infinite}
+.dot.ok{background:var(--cs);animation:none}
+.dot.warn{background:var(--cc);animation:none}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* HW FIELDS - single unified row */
+.hw-fields{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--b1)}
+.hw-field{padding:14px 16px;border-left:1px solid var(--b1);position:relative}
+body.ltr .hw-field{border-left:none;border-right:1px solid var(--b1)}
+.hw-field:first-child{border-left:none}
+body.ltr .hw-field:first-child{border-right:none;border-left:1px solid var(--b1)}
+body.ltr .hw-field:last-child{border-left:none}
+.hw-field-key{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
+.hw-field-val{font-family:var(--mono);font-size:15px;font-weight:700;color:var(--t1)}
+.hw-field-sub{font-size:10px;color:var(--t3);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:160px}
+
+/* EDIT TOGGLES — appear as inline editable under each field */
+.hw-edit-row{display:none;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--b1);background:var(--s2);gap:0}
+.hw-edit-row.open{display:grid}
+.hw-edit-cell{padding:12px 16px;border-left:1px solid var(--b1)}
+body.ltr .hw-edit-cell{border-left:none;border-right:1px solid var(--b1)}
+.hw-edit-cell:first-child{border-left:none}
+body.ltr .hw-edit-cell:first-child{border-right:none;border-left:1px solid var(--b1)}
+body.ltr .hw-edit-cell:last-child{border-left:none}
+.hw-edit-cell label{display:block;font-family:var(--mono);font-size:9px;color:var(--acc);letter-spacing:1px;margin-bottom:5px;text-transform:uppercase}
+.hw-edit-cell select,.hw-edit-cell input{width:100%;background:var(--s3);border:1px solid var(--b2);border-radius:3px;color:var(--t1);padding:6px 8px;font-family:var(--mono);font-size:11px;outline:none;transition:border-color .15s}
+.hw-edit-cell select:focus,.hw-edit-cell input:focus{border-color:var(--acc)}
+.hw-edit-cell select option{background:var(--s2)}
+
+.hw-actions{display:flex;align-items:center;justify-content:space-between;padding:10px 16px}
+.edit-toggle{background:none;border:none;color:var(--t3);font-size:11px;font-family:var(--sans);cursor:pointer;padding:0;transition:color .15s}
+.edit-toggle:hover{color:var(--acc)}
+.hw-apply-btns{display:none;gap:8px}
+.hw-apply-btns.show{display:flex}
+.btn-sm{padding:5px 14px;border-radius:3px;font-family:var(--mono);font-size:11px;cursor:pointer;transition:.15s}
+.btn-apply{background:var(--acc);color:#000;border:none;font-weight:700}
+.btn-apply:hover{opacity:.85}
+.btn-cancel{background:none;color:var(--t2);border:1px solid var(--b2)}
+.btn-cancel:hover{border-color:var(--t2)}
+
+/* GRADE CHIPS */
+.grade-row{max-width:1100px;margin:0 auto 16px;padding:0 20px;display:flex;gap:6px;flex-wrap:wrap}
+.gchip{display:flex;align-items:center;gap:5px;padding:5px 12px;border:1px solid var(--b1);border-radius:3px;background:var(--s1);cursor:pointer;transition:.15s;font-family:var(--mono);font-size:11px}
+.gchip:hover,.gchip.on{border-color:var(--b2);background:var(--s2)}
+.gchip.on{border-color:var(--b3)}
+.gl{font-weight:700;font-size:12px}
+.gs,.gchip-all-count{color:var(--t3);font-size:10px}
+
+/* FILTER BAR */
+.fbar{max-width:1100px;margin:0 auto 12px;padding:0 20px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.flabel{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;white-space:nowrap}
+.fbtn{padding:4px 11px;border-radius:3px;border:1px solid var(--b1);background:none;color:var(--t2);font-size:11px;font-family:var(--sans);cursor:pointer;transition:.15s;white-space:nowrap}
+.fbtn.on{border-color:var(--acc);color:var(--acc);background:rgba(212,255,71,.05)}
+.fbtn:hover{border-color:var(--b2);color:var(--t1)}
+.fsel{padding:4px 9px;border-radius:3px;border:1px solid var(--b1);background:var(--s1);color:var(--t2);font-family:var(--mono);font-size:11px;cursor:pointer;outline:none;margin-right:auto}
+body.ltr .fsel{margin-right:0;margin-left:auto}
+.fsel option{background:var(--s2)}
+.fsearch{padding:5px 10px;border-radius:3px;border:1px solid var(--b1);background:var(--s1);color:var(--t1);font-family:var(--mono);font-size:11px;outline:none;transition:border-color .15s;width:180px}
+.fsearch:focus{border-color:var(--acc)}
+.fsearch::placeholder{color:var(--t3)}
+
+/* MODEL TABLE */
+.tbl-wrap{max-width:1100px;margin:0 auto 60px;padding:0 20px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1.2px;text-transform:uppercase;padding:8px 10px;border-bottom:1px solid var(--b1);text-align:right;white-space:nowrap;background:var(--bg);cursor:pointer;user-select:none}
+body.ltr thead th{text-align:left}
+thead th:hover{color:var(--t2)}
+thead th.sorted{color:var(--acc)}
+tbody tr{border-bottom:1px solid var(--b1);transition:background .1s;cursor:default}
+tbody tr:hover{background:var(--s1)}
+tbody td{padding:9px 10px;vertical-align:middle}
+.td-grade .gbadge{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;border-radius:3px;font-family:var(--mono);font-weight:700;font-size:12px}
+.g-S{background:rgba(34,197,94,.12);color:var(--cs);border:1px solid rgba(34,197,94,.25)}
+.g-A{background:rgba(132,204,22,.12);color:var(--ca);border:1px solid rgba(132,204,22,.25)}
+.g-B{background:rgba(234,179,8,.12);color:var(--cb);border:1px solid rgba(234,179,8,.25)}
+.g-C{background:rgba(249,115,22,.12);color:var(--cc);border:1px solid rgba(249,115,22,.25)}
+.g-D{background:rgba(239,68,68,.12);color:var(--cd);border:1px solid rgba(239,68,68,.25)}
+.g-F{background:rgba(82,82,91,.12);color:var(--cf);border:1px solid rgba(82,82,91,.25)}
+.g-X{background:var(--s2);color:var(--t3);border:1px solid var(--b1)}
+.td-name{font-family:var(--mono);font-weight:600;color:var(--t1);font-size:12px;direction:ltr;text-align:left;min-width:180px}
+.td-provider{color:var(--t3);font-family:var(--mono);font-size:10px;white-space:nowrap}
+.td-params{font-family:var(--mono);color:var(--t2);white-space:nowrap}
+.td-size{font-family:var(--mono);color:var(--t2);white-space:nowrap}
+.td-ctx{font-family:var(--mono);color:var(--t3);white-space:nowrap}
+.td-arch .arch-pill{font-family:var(--mono);font-size:10px;padding:2px 6px;border-radius:2px;background:var(--s2);color:var(--t3);border:1px solid var(--b1);white-space:nowrap}
+.arch-pill.moe{color:#a78bfa;background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.2)}
+.td-tasks{min-width:120px}
+.task-tag{display:inline-block;font-family:var(--mono);font-size:9px;padding:2px 5px;border-radius:2px;margin:1px;direction:ltr}
+.tt-chat{color:#60a5fa;background:rgba(96,165,250,.1)}
+.tt-code{color:#a78bfa;background:rgba(167,139,250,.1)}
+.tt-reasoning{color:#f9a8d4;background:rgba(249,168,212,.1)}
+.tt-vision{color:#34d399;background:rgba(52,211,153,.1)}
+.tt-edge{color:#fbbf24;background:rgba(251,191,36,.1)}
+.tt-multilingual{color:#fb923c;background:rgba(251,146,60,.1)}
+.tt-rag{color:#a3e635;background:rgba(163,230,53,.1)}
+.td-quant{font-family:var(--mono);font-size:10px;color:var(--acc);white-space:nowrap}
+.td-desc{color:var(--t2);font-size:11px;direction:ltr;text-align:left;min-width:200px;max-width:280px}
+.tbl-empty{text-align:center;padding:48px;color:var(--t3);font-size:13px}
+
+/* ── TIER PAGE ── */
+.tier-wrap{max-width:900px;margin:0 auto;padding:20px}
+.tier-hero{padding:40px 0 28px;text-align:center}
+.tier-hero h2{font-size:clamp(24px,4vw,42px);font-weight:800;letter-spacing:-1.5px;margin-bottom:8px}
+.tier-hero p{color:var(--t2);font-size:13px}
+.tier-controls{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:20px;padding:12px 16px;background:var(--s1);border:1px solid var(--b1);border-radius:4px}
+.tier-ctrl-label{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.tier-btn{padding:4px 10px;border-radius:3px;border:1px solid var(--b1);background:none;color:var(--t2);font-size:11px;cursor:pointer;transition:.15s;font-family:var(--mono)}
+.tier-btn.on{border-color:var(--acc);color:var(--acc)}
+.tier-btn:hover{border-color:var(--b2);color:var(--t1)}
+.tier-section{margin-bottom:8px;border:1px solid var(--b1);border-radius:4px;overflow:hidden}
+.tier-header{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--s1)}
+.tier-grade-letter{font-family:var(--mono);font-weight:800;font-size:22px;width:32px;text-align:center}
+.tier-grade-name{font-size:12px;color:var(--t2)}
+.tier-grade-count{font-family:var(--mono);font-size:11px;color:var(--t3);margin-right:auto}
+body.ltr .tier-grade-count{margin-right:0;margin-left:auto}
+.tier-models{display:flex;flex-wrap:wrap;gap:6px;padding:10px 16px;background:var(--bg)}
+.tier-model-chip{font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:3px;border:1px solid var(--b1);background:var(--s1);color:var(--t2);direction:ltr;display:flex;align-items:center;gap:6px;transition:.15s}
+.tier-model-chip:hover{border-color:var(--b2);color:var(--t1)}
+.tier-chip-size{font-size:9px;color:var(--t3)}
+.tier-empty{padding:12px 16px;color:var(--t3);font-size:11px;font-family:var(--mono)}
+
+/* ── DOCS PAGE ── */
+.docs-wrap{max-width:720px;margin:0 auto;padding:40px 20px 60px}
+.docs-wrap h2{font-size:clamp(22px,3.5vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.docs-wrap .sub{color:var(--t2);font-size:13px;margin-bottom:36px}
+.doc-section{margin-bottom:8px;border:1px solid var(--b1);border-radius:4px;overflow:hidden}
+.doc-section summary{list-style:none;padding:14px 16px;background:var(--s1);cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .15s}
+.doc-section summary:hover{background:var(--s2)}
+.doc-section summary::-webkit-details-marker{display:none}
+.doc-section-title{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--acc)}
+.doc-chevron{font-size:10px;color:var(--t3);transition:transform .2s}
+details[open] .doc-chevron{transform:rotate(180deg)}
+.doc-body{padding:16px;background:var(--bg);color:var(--t2);font-size:13px;line-height:1.75;border-top:1px solid var(--b1)}
+.doc-body p{margin-bottom:12px}
+.doc-body p:last-child{margin-bottom:0}
+.doc-body code{font-family:var(--mono);font-size:11px;background:var(--s2);padding:2px 5px;border-radius:2px;color:var(--acc);border:1px solid var(--b1)}
+.doc-body pre{font-family:var(--mono);font-size:11px;background:var(--s2);padding:12px 14px;border-radius:4px;border:1px solid var(--b1);overflow-x:auto;margin:10px 0;color:var(--t1);direction:ltr;text-align:left}
+.doc-table{width:100%;border-collapse:collapse;margin:12px 0;font-size:12px}
+.doc-table th{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase;padding:6px 10px;border-bottom:1px solid var(--b1);text-align:right}
+body.ltr .doc-table th{text-align:left}
+.doc-table td{padding:7px 10px;border-bottom:1px solid var(--b1);color:var(--t2);font-family:var(--mono);font-size:11px}
+.doc-table tr:last-child td{border-bottom:none}
+.size-bar-row{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.size-bar-item{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px}
+.size-bar-label{color:var(--t2);width:60px;text-align:right}
+body.ltr .size-bar-label{text-align:left}
+.size-bar-track{flex:1;height:6px;background:var(--s2);border-radius:3px;overflow:hidden}
+.size-bar-fill{height:100%;border-radius:3px;background:var(--acc);transition:width .5s ease}
+.size-bar-val{color:var(--t3);width:80px}
+
+/* ── WHY PAGE ── */
+.why-wrap{max-width:720px;margin:0 auto;padding:40px 20px 60px}
+.why-wrap h2{font-size:clamp(22px,3.5vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.why-wrap .sub{color:var(--t2);font-size:13px;margin-bottom:36px}
+.why-section{margin-bottom:28px}
+.why-section h3{font-family:var(--mono);font-size:13px;color:var(--acc);margin-bottom:10px;font-weight:700}
+.why-section p,.why-section li{color:var(--t2);font-size:13px;line-height:1.75;margin-bottom:8px}
+.why-section pre{font-family:var(--mono);font-size:11px;background:var(--s1);padding:12px 14px;border-radius:4px;border:1px solid var(--b1);overflow-x:auto;margin:10px 0;color:var(--t1);direction:ltr;text-align:left}
+.why-section code{font-family:var(--mono);font-size:11px;background:var(--s2);padding:2px 5px;border-radius:2px;color:var(--acc)}
+.why-flow{display:flex;align-items:center;gap:0;margin:16px 0;flex-wrap:wrap}
+.why-step{background:var(--s1);border:1px solid var(--b1);padding:8px 14px;border-radius:3px;font-family:var(--mono);font-size:11px;color:var(--t2);white-space:nowrap}
+.why-arrow{color:var(--t3);padding:0 8px;font-size:14px}
+.grade-scale-table{width:100%;border-collapse:collapse;font-size:12px;margin:10px 0}
+.grade-scale-table th{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1px;padding:6px 10px;border-bottom:1px solid var(--b1);text-align:right}
+body.ltr .grade-scale-table th{text-align:left}
+.grade-scale-table td{padding:8px 10px;border-bottom:1px solid var(--b1);font-family:var(--mono);font-size:11px;color:var(--t2)}
+.grade-scale-table tr:last-child td{border-bottom:none}
+.privacy-box{background:var(--s1);border:1px solid var(--b1);border-radius:4px;padding:14px 16px;margin-top:12px}
+.privacy-box p{color:var(--t2);font-size:12px;margin:0}
+
+/* FOOTER */
+footer{display:none}
+
+/* ── GET STARTED PAGE ── */
+.gs-wrap{max-width:800px;margin:0 auto;padding:40px 20px 60px}
+.gs-wrap h2{font-size:clamp(22px,3.5vw,36px);font-weight:800;letter-spacing:-1px;margin-bottom:6px}
+.gs-wrap .sub{color:var(--t2);font-size:13px;margin-bottom:12px}
+.gs-rec-box{background:var(--s1);border:1px solid var(--acc);border-radius:6px;padding:14px 18px;margin-bottom:32px;display:flex;align-items:center;gap:14px}
+.gs-rec-icon{font-size:22px;flex-shrink:0}
+.gs-rec-text{font-size:13px;color:var(--t2);line-height:1.6}
+.gs-rec-text strong{color:var(--acc);font-family:var(--mono)}
+.gs-tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin-bottom:36px}
+.gs-tool-card{background:var(--s1);border:1px solid var(--b1);border-radius:6px;padding:18px;display:flex;flex-direction:column;gap:10px;transition:border-color .15s}
+.gs-tool-card:hover{border-color:var(--b2)}
+.gs-tool-top{display:flex;align-items:center;gap:10px}
+.gs-tool-icon{width:36px;height:36px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.gs-tool-name{font-family:var(--mono);font-weight:700;font-size:13px;color:var(--t1)}
+.gs-tool-platform{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:.8px;margin-top:1px}
+.gs-tool-desc{font-size:12px;color:var(--t2);line-height:1.6}
+.gs-tool-tags{display:flex;gap:4px;flex-wrap:wrap}
+.gs-tool-tag{font-family:var(--mono);font-size:9px;padding:2px 6px;border-radius:2px;background:var(--s2);border:1px solid var(--b1);color:var(--t3)}
+.gs-tool-link{display:inline-block;font-family:var(--mono);font-size:10px;color:var(--acc);text-decoration:none;margin-top:auto;padding-top:4px;transition:opacity .15s}
+.gs-tool-link:hover{opacity:.7}
+.gs-steps-title{font-family:var(--mono);font-size:11px;color:var(--t3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:14px}
+.gs-steps{display:flex;flex-direction:column;gap:0}
+.gs-step{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid var(--b1)}
+.gs-step:last-child{border-bottom:none}
+.gs-step-num{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);width:22px;flex-shrink:0;padding-top:2px}
+.gs-step-body{flex:1}
+.gs-step-title{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--t1);margin-bottom:5px}
+.gs-step-desc{font-size:12px;color:var(--t2);line-height:1.65}
+.gs-step-code{font-family:var(--mono);font-size:11px;background:var(--s1);border:1px solid var(--b1);border-radius:3px;padding:8px 12px;margin-top:8px;color:var(--t1);direction:ltr;text-align:left;overflow-x:auto}
+.gs-step-code .cmd{color:var(--acc)}
+.gs-mosaid-banner{background:var(--s1);border:1px solid var(--b2);border-radius:6px;padding:16px 18px;margin-top:28px;display:flex;align-items:center;gap:14px}
+.gs-mosaid-badge{background:rgba(212,255,71,.1);border:1px solid rgba(212,255,71,.25);border-radius:4px;padding:6px 10px;font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);white-space:nowrap;direction:ltr}
+.gs-mosaid-text{font-size:12px;color:var(--t2);line-height:1.6}
+.gs-mosaid-text a{color:var(--acc);text-decoration:none}
+.gs-mosaid-text a:hover{text-decoration:underline}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--b2);border-radius:3px}
+
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.page.active{animation:fadein .2s ease}
+
+@media(max-width:640px){
+  .hw-fields,.hw-edit-row{grid-template-columns:repeat(2,1fr)}
+  .hw-field:nth-child(2n+1){border-left:none}
+  body.ltr .hw-field:nth-child(2n+1){border-right:none}
+  .hw-field:nth-child(n+3){border-top:1px solid var(--b1)}
+  h1{letter-spacing:-1px}
+  .tbl-wrap{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand" onclick="nav('home')" id="brand">تقدر تشغّل؟</span>
+  <div class="nav-links">
+    <button class="nav-link lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
+    <button class="nav-link active" onclick="nav('home')" id="nl-home" data-page="home">الرئيسية</button>
+    <button class="nav-link" onclick="nav('tier')" id="nl-tier" data-page="tier">قائمة المستويات</button>
+    <button class="nav-link" onclick="nav('docs')" id="nl-docs" data-page="docs">المصطلحات</button>
+    <button class="nav-link" onclick="nav('why')" id="nl-why" data-page="why">كيف نعرف</button>
+    <button class="nav-link" onclick="nav('start')" id="nl-start" data-page="start">ابدأ الآن</button>
+  </div>
+</nav>
+
+<!-- ══════════════ HOME ══════════════ -->
+<div class="page active" id="page-home">
+  <div class="hero">
+    <div class="hero-tag" id="hero-tag">كشف الجهاز تلقائياً</div>
+    <h1 id="hero-h1">هل يشغّل <em>الذكاء الاصطناعي</em><br>على جهازك؟</h1>
+    <p class="hero-sub" id="hero-sub">يكشف عتادك تلقائياً ويُصنّف كل نموذج بناءً على قدرتك الفعلية على تشغيله</p>
+  </div>
+
+  <!-- HARDWARE PANEL (shared across pages, lives here, referenced by tier) -->
+  <div class="hw-wrap">
+    <div class="hw-card">
+      <div class="hw-top">
+        <span class="hw-label" id="hw-card-label">مواصفات الجهاز</span>
+        <span class="hw-status"><span class="dot" id="dot"></span><span id="hw-status-text">جارٍ الكشف...</span></span>
+      </div>
+      <!-- DISPLAY ROW -->
+      <div class="hw-fields" id="hw-fields">
+        <div class="hw-field">
+          <div class="hw-field-key">VRAM / GPU</div>
+          <div class="hw-field-val" id="hv-vram">—</div>
+          <div class="hw-field-sub" id="hv-gpu">—</div>
+        </div>
+        <div class="hw-field">
+          <div class="hw-field-key" id="hk-ram">RAM</div>
+          <div class="hw-field-val" id="hv-ram">—</div>
+          <div class="hw-field-sub">navigator.deviceMemory</div>
+        </div>
+        <div class="hw-field">
+          <div class="hw-field-key" id="hk-threads">CPU</div>
+          <div class="hw-field-val" id="hv-threads">—</div>
+          <div class="hw-field-sub">hardwareConcurrency</div>
+        </div>
+        <div class="hw-field">
+          <div class="hw-field-key">WebGPU</div>
+          <div class="hw-field-val" id="hv-webgpu">—</div>
+          <div class="hw-field-sub" id="hv-webgpu-arch">—</div>
+        </div>
+      </div>
+      <!-- EDIT ROW (same 4 columns, directly below) -->
+      <div class="hw-edit-row" id="hw-edit-row">
+        <div class="hw-edit-cell">
+          <label id="el-vram">VRAM (GB)</label>
+          <select id="ov-vram">
+            <option value="0">—</option>
+            <option value="2">2 GB</option><option value="4">4 GB</option>
+            <option value="6">6 GB</option><option value="8">8 GB</option>
+            <option value="10">10 GB</option><option value="12">12 GB</option>
+            <option value="16">16 GB</option><option value="20">20 GB</option>
+            <option value="24">24 GB</option><option value="32">32 GB</option>
+            <option value="40">40 GB</option><option value="48">48 GB</option>
+            <option value="80">80 GB</option><option value="96">96 GB</option>
+            <option value="128">128 GB</option><option value="192">192 GB+</option>
+          </select>
+        </div>
+        <div class="hw-edit-cell">
+          <label id="el-ram">RAM (GB)</label>
+          <select id="ov-ram">
+            <option value="4">4 GB</option><option value="8">8 GB</option>
+            <option value="16">16 GB</option><option value="32">32 GB</option>
+            <option value="64">64 GB</option><option value="128">128 GB</option>
+          </select>
+        </div>
+        <div class="hw-edit-cell">
+          <label id="el-threads">CPU Threads</label>
+          <select id="ov-threads">
+            <option value="2">2</option><option value="4">4</option>
+            <option value="8">8</option><option value="12">12</option>
+            <option value="16">16</option><option value="24">24</option>
+            <option value="32">32</option><option value="64">64</option>
+          </select>
+        </div>
+        <div class="hw-edit-cell">
+          <label id="el-gpu">GPU Name</label>
+          <input type="text" id="ov-gpu" placeholder="e.g. RTX 4090">
+        </div>
+      </div>
+      <div class="hw-actions">
+        <button class="edit-toggle" onclick="toggleEdit()" id="edit-toggle-btn">✎ تعديل يدوي</button>
+        <div class="hw-apply-btns" id="apply-btns">
+          <button class="btn-sm btn-cancel" onclick="cancelEdit()" id="btn-cancel">إلغاء</button>
+          <button class="btn-sm btn-apply" onclick="applyEdit()" id="btn-apply">تطبيق</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GRADE CHIPS -->
+  <div class="grade-row" id="grade-row"></div>
+
+  <!-- FILTER BAR -->
+  <div class="fbar">
+    <input class="fsearch" type="text" id="fsearch" placeholder="ابحث..." oninput="renderTable()">
+    <span class="flabel" id="fl-task">المهمة</span>
+    <button class="fbtn on" data-task="all" onclick="setTask(this)" id="ft-all">الكل</button>
+    <button class="fbtn" data-task="chat" onclick="setTask(this)" id="ft-chat">محادثة</button>
+    <button class="fbtn" data-task="code" onclick="setTask(this)" id="ft-code">برمجة</button>
+    <button class="fbtn" data-task="reasoning" onclick="setTask(this)" id="ft-reasoning">استدلال</button>
+    <button class="fbtn" data-task="vision" onclick="setTask(this)" id="ft-vision">رؤية</button>
+    <select class="fsel" id="fsel" onchange="renderTable()">
+      <option value="score" id="fs-score">ترتيب: الأفضل</option>
+      <option value="params_asc" id="fs-asc">ترتيب: الأصغر ↑</option>
+      <option value="params_desc" id="fs-desc">ترتيب: الأكبر ↑</option>
+      <option value="newest" id="fs-new">ترتيب: الأحدث</option>
+      <option value="vram" id="fs-vram">ترتيب: VRAM ↑</option>
+    </select>
+  </div>
+
+  <!-- TABLE -->
+  <div class="tbl-wrap">
+    <table id="model-table">
+      <thead>
+        <tr>
+          <th onclick="sortBy('grade')" id="th-grade">درجة</th>
+          <th onclick="sortBy('name')" id="th-name">النموذج</th>
+          <th onclick="sortBy('provider')" id="th-provider">المزود</th>
+          <th onclick="sortBy('params')" id="th-params">المعاملات</th>
+          <th onclick="sortBy('sizeQ4')" id="th-size">الحجم Q4</th>
+          <th onclick="sortBy('ctx')" id="th-ctx">السياق</th>
+          <th id="th-arch">المعمارية</th>
+          <th id="th-tasks">المهام</th>
+          <th id="th-quant">الكَم المُوصى</th>
+          <th id="th-desc">الوصف</th>
+        </tr>
+      </thead>
+      <tbody id="tbl-body"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══════════════ TIER ══════════════ -->
+<div class="page" id="page-tier">
+  <div class="tier-wrap">
+    <div class="tier-hero">
+      <h2 id="tier-h2">قائمة المستويات</h2>
+      <p id="tier-sub">جهازك مقابل كل نموذج — بتنسيق قائمة المستويات الكلاسيكي</p>
+    </div>
+    <div class="tier-controls">
+      <span class="tier-ctrl-label" id="tc-filter">فلتر</span>
+      <button class="tier-btn on" data-tier-task="all" onclick="setTierTask(this)" id="tt-all">الكل</button>
+      <button class="tier-btn" data-tier-task="chat" onclick="setTierTask(this)" id="tt-chat">محادثة</button>
+      <button class="tier-btn" data-tier-task="code" onclick="setTierTask(this)" id="tt-code">برمجة</button>
+      <button class="tier-btn" data-tier-task="reasoning" onclick="setTierTask(this)" id="tt-reasoning">استدلال</button>
+      <button class="tier-btn on" id="tc-hide-f-btn" onclick="toggleHideF(this)" data-hide="false">إخفاء الدرجة F</button>
+    </div>
+    <div id="tier-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════ DOCS ══════════════ -->
+<div class="page" id="page-docs">
+  <div class="docs-wrap">
+    <h2 id="docs-h2">المصطلحات</h2>
+    <p class="sub" id="docs-sub">المصطلحات والمفاهيم الأساسية المستخدمة في الموقع، موضّحة ببساطة</p>
+    <div id="docs-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════ WHY ══════════════ -->
+<div class="page" id="page-why">
+  <div class="why-wrap">
+    <h2 id="why-h2">كيف نعرف</h2>
+    <p class="sub" id="why-sub">كيف نكشف عتادك، ونُصنّف النماذج، ومن أين تأتي الأرقام</p>
+    <div id="why-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════ GET STARTED ══════════════ -->
+<div class="page" id="page-start">
+  <div class="gs-wrap">
+    <h2 id="gs-h2">ابدأ الآن</h2>
+    <p class="sub" id="gs-sub">جهازك جاهز — هذا كل ما تحتاجه لتشغيل أول نموذج AI محلياً</p>
+    <div id="gs-rec-wrap"></div>
+    <div id="gs-tools-wrap"></div>
+    <div id="gs-steps-wrap"></div>
+    <div id="gs-mosaid-wrap"></div>
+  </div>
+</div>
+
+<footer><span id="footer-txt"></span></footer>
+
+<script>
+// ══════════════════════════════════════
+// TRANSLATIONS
+// ══════════════════════════════════════
+const isAr = () => currentLang === 'ar';
+let currentLang = (navigator.language||'').startsWith('ar') ? 'ar' : 'en';
+
+const TXT = {
+  ar: {
+    brand:'تقدر تشغّل؟', langBtn:'EN',
+    'nl-home':'الرئيسية','nl-tier':'قائمة المستويات','nl-docs':'المصطلحات','nl-why':'كيف نعرف','nl-start':'ابدأ الآن',
+    'hero-tag':'كشف الجهاز تلقائياً',
+    'hero-h1':'تقدر تشغّل <em>الذكاء الاصطناعي</em><br>محلي على جهازك؟',
+    'hero-sub':'يكشف عتادك تلقائياً ويُصنّف كل نموذج بناءً على قدرتك الفعلية على تشغيله',
+    'hw-card-label':'مواصفات الجهاز',
+    'hw-status-detecting':'جارٍ الكشف...','hw-status-done':'تم الكشف','hw-status-partial':'كشف جزئي',
+    'hk-ram':'الذاكرة','hk-threads':'المعالج',
+    'el-vram':'VRAM (GB)','el-ram':'RAM (GB)','el-threads':'خيوط المعالج','el-gpu':'اسم GPU',
+    'edit-toggle-btn':'✎ تعديل يدوي','btn-cancel':'إلغاء','btn-apply':'تطبيق',
+    'fl-task':'المهمة','ft-all':'الكل','ft-chat':'محادثة','ft-code':'برمجة','ft-reasoning':'استدلال','ft-vision':'رؤية',
+    'fs-score':'ترتيب: الأفضل','fs-asc':'ترتيب: الأصغر ↑','fs-desc':'ترتيب: الأكبر ↑','fs-new':'ترتيب: الأحدث','fs-vram':'ترتيب: VRAM ↑',
+    'fsearch':'ابحث...',
+    'th-grade':'درجة','th-name':'النموذج','th-provider':'المزود','th-params':'المعاملات','th-size':'الحجم Q4','th-ctx':'السياق','th-arch':'المعمارية','th-tasks':'المهام','th-quant':'الكَم المُوصى','th-desc':'الوصف',
+    'tier-h2':'قائمة المستويات','tier-sub':'جهازك مقابل كل نموذج — بتنسيق قائمة المستويات الكلاسيكي',
+    'tc-filter':'فلتر','tt-all':'الكل','tt-chat':'محادثة','tt-code':'برمجة','tt-reasoning':'استدلال','tc-hide-f-btn':'إخفاء الدرجة F',
+    'docs-h2':'المصطلحات','docs-sub':'المصطلحات والمفاهيم الأساسية المستخدمة في الموقع، موضّحة ببساطة',
+    'why-h2':'كيف نعرف','why-sub':'كيف نكشف عتادك، ونُصنّف النماذج، ومن أين تأتي الأرقام',
+    'gs-h2':'ابدأ الآن','gs-sub':'جهازك جاهز — هذا كل ما تحتاجه لتشغيل أول نموذج AI محلياً',
+    'footer-txt':'',
+    grades:{ S:'ممتاز', A:'جيد جداً', B:'جيد', C:'محدود', D:'ثقيل', F:'غير متاح' },
+    tasks:{ chat:'محادثة', code:'برمجة', reasoning:'استدلال', vision:'رؤية', edge:'حافة', multilingual:'متعدد اللغات', rag:'RAG' },
+    arch:{ Dense:'كثيف', MoE:'MoE' },
+    'grade-all':'الكل',
+    'tbl-empty':'لا توجد نماذج مطابقة — جرّب تغيير الفلاتر',
+    dir:'rtl'
+  },
+  en: {
+    brand:'Can It Run?', langBtn:'عربي',
+    'nl-home':'Home','nl-tier':'Tier List','nl-docs':'Glossary','nl-why':'How It Works','nl-start':'Get Started',
+    'hero-tag':'Auto Hardware Detection',
+    'hero-h1':'Can My Machine Run<br><em>Local AI?</em>',
+    'hero-sub':'Auto-detects your hardware and grades every AI model by your actual ability to run it',
+    'hw-card-label':'Device Specs',
+    'hw-status-detecting':'Detecting...','hw-status-done':'Detected','hw-status-partial':'Partial',
+    'hk-ram':'RAM','hk-threads':'CPU',
+    'el-vram':'VRAM (GB)','el-ram':'RAM (GB)','el-threads':'CPU Threads','el-gpu':'GPU Name',
+    'edit-toggle-btn':'✎ Edit manually','btn-cancel':'Cancel','btn-apply':'Apply',
+    'fl-task':'Task','ft-all':'All','ft-chat':'Chat','ft-code':'Code','ft-reasoning':'Reasoning','ft-vision':'Vision',
+    'fs-score':'Sort: Score','fs-asc':'Sort: Params ↑','fs-desc':'Sort: Params ↓','fs-new':'Sort: Newest','fs-vram':'Sort: VRAM ↑',
+    'fsearch':'Search models...',
+    'th-grade':'Grade','th-name':'Model','th-provider':'Provider','th-params':'Params','th-size':'Q4 Size','th-ctx':'Context','th-arch':'Arch','th-tasks':'Tasks','th-quant':'Rec. Quant','th-desc':'Description',
+    'tier-h2':'Tier List','tier-sub':'Your hardware vs every model — classic tier list format',
+    'tc-filter':'Filter','tt-all':'All','tt-chat':'Chat','tt-code':'Code','tt-reasoning':'Reasoning','tc-hide-f-btn':'Hide F tier',
+    'docs-h2':'Glossary','docs-sub':'Key terms and concepts used on this site, explained simply',
+    'why-h2':'How It Works','why-sub':'How we detect your hardware, score models, and where the numbers come from',
+    'gs-h2':'Get Started','gs-sub':'Your device is graded — here\'s everything you need to run your first local AI model',
+    'footer-txt':'',
+    grades:{ S:'Excellent', A:'Great', B:'Good', C:'Tight', D:'Barely', F:'Too Heavy' },
+    tasks:{ chat:'Chat', code:'Code', reasoning:'Reasoning', vision:'Vision', edge:'Edge', multilingual:'Multilingual', rag:'RAG' },
+    arch:{ Dense:'Dense', MoE:'MoE' },
+    'grade-all':'All',
+    'tbl-empty':'No models match — try adjusting filters',
+    dir:'ltr'
+  }
+};
+
+function t(k){ return TXT[currentLang][k] || k }
+
+function applyTxt(){
+  document.documentElement.lang = currentLang;
+  document.documentElement.dir = t('dir');
+  document.body.classList.toggle('ltr', currentLang==='en');
+  const ids = ['brand','langBtn','nl-home','nl-tier','nl-docs','nl-why','nl-start','hero-tag','hero-sub',
+    'hw-card-label','hk-ram','hk-threads','el-vram','el-ram','el-threads','el-gpu',
+    'edit-toggle-btn','btn-cancel','btn-apply','fl-task','ft-all','ft-chat','ft-code',
+    'ft-reasoning','ft-vision','tc-filter','tt-all','tt-chat','tt-code','tt-reasoning',
+    'tc-hide-f-btn','docs-h2','docs-sub','tier-h2','tier-sub','why-h2','why-sub','gs-h2','gs-sub'];
+  ids.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=t(id);
+  });
+  // HTML content
+  ['hero-h1','footer-txt'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.innerHTML=t(id);
+  });
+  // select options
+  ['fs-score','fs-asc','fs-desc','fs-new','fs-vram'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=t(id);
+  });
+  document.getElementById('fsearch').placeholder=t('fsearch');
+  // th
+  ['th-grade','th-name','th-provider','th-params','th-size','th-ctx','th-arch','th-tasks','th-quant','th-desc'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=t(id);
+  });
+  // hw status
+  document.getElementById('hw-status-text').textContent = t('hw-status-'+hwStatusKey);
+
+  buildDocs();
+  buildWhy();
+  buildGetStarted();
+  renderGradeChips();
+  renderTable();
+  renderTier();
+}
+
+function toggleLang(){
+  currentLang = currentLang==='ar'?'en':'ar';
+  applyTxt();
+}
+
+// ══════════════════════════════════════
+// HARDWARE DETECTION
+// ══════════════════════════════════════
+const HW = { vram:0, ram:0, threads:0, gpu:'', arch:'', webgpuSupported:false };
+let hwStatusKey = 'detecting';
+
+const GPU_DB = {
+  // RTX 50
+  'rtx 5090':32,'rtx 5080':16,'rtx 5070 ti':16,'rtx 5070':12,'rtx 5060 ti':16,'rtx 5060':8,
+  // RTX 40
+  'rtx 4090':24,'rtx 4080 super':16,'rtx 4080':16,'rtx 4070 ti super':16,'rtx 4070 ti':12,
+  'rtx 4070 super':12,'rtx 4070':12,'rtx 4060 ti 16':16,'rtx 4060 ti':8,'rtx 4060':8,
+  // RTX 30
+  'rtx 3090 ti':24,'rtx 3090':24,'rtx 3080 ti':12,'rtx 3080 12':12,'rtx 3080':10,
+  'rtx 3070 ti':8,'rtx 3070':8,'rtx 3060 ti':8,'rtx 3060 12':12,'rtx 3060':8,'rtx 3050':8,
+  // RTX 20
+  'rtx 2080 ti':11,'rtx 2080 super':8,'rtx 2080':8,'rtx 2070 super':8,'rtx 2070':8,'rtx 2060 super':8,'rtx 2060':6,
+  // Data center
+  'a100 80':80,'h100 80':80,'a100 40':40,'h100':80,'a100':80,'l40s':48,'l40':48,'a40':48,
+  'a6000':48,'a5000':24,'a4000':16,'a2000 12':12,'a2000':6,
+  // AMD
+  'rx 7900 xtx':24,'rx 7900 xt':20,'rx 7900 gre':16,'rx 7800 xt':16,'rx 7700 xt':12,'rx 7600':8,
+  'rx 6950 xt':16,'rx 6900 xt':16,'rx 6800 xt':16,'rx 6800':16,'rx 6700 xt':12,'rx 6600 xt':8,'rx 6600':8,
+  // Intel
+  'arc a770':16,'arc a750':8,'arc a580':8,'arc a380':6,
+  // Apple
+  'm4 ultra':192,'m4 max':128,'m4 pro':48,'m4':16,
+  'm3 ultra':192,'m3 max':128,'m3 pro':36,'m3':8,
+  'm2 ultra':192,'m2 max':96,'m2 pro':32,'m2':8,
+  'm1 ultra':128,'m1 max':64,'m1 pro':32,'m1':8,
+};
+
+function inferVRAM(name){
+  const n = name.toLowerCase();
+  // longest-match
+  let best=null, bestLen=0;
+  for(const [k,v] of Object.entries(GPU_DB)){
+    if(n.includes(k) && k.length>bestLen){ best=v; bestLen=k.length; }
+  }
+  return best||0;
+}
+
+async function detect(){
+  // RAM
+  HW.ram = navigator.deviceMemory || 0;
+  // Threads
+  HW.threads = navigator.hardwareConcurrency || 0;
+
+  // WebGL — best GPU name source
+  try {
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    if(gl){
+      const ext = gl.getExtension('WEBGL_debug_renderer_info');
+      if(ext){
+        const renderer = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)||'';
+        // strip "ANGLE (NVIDIA, " prefix etc
+        HW.gpu = renderer
+          .replace(/ANGLE \([^,]+, /i,'')
+          .replace(/ANGLE \(/i,'')
+          .replace(/ Direct3D.*/i,'')
+          .replace(/ \(.*\)/,'')
+          .replace(/NVIDIA /i,'')
+          .replace(/AMD /i,'')
+          .replace(/Intel\(R\) /i,'')
+          .trim();
+      }
+    }
+  } catch(e){}
+
+  // WebGPU — additional info
+  if(navigator.gpu){
+    try {
+      const adapter = await navigator.gpu.requestAdapter();
+      if(adapter){
+        HW.webgpuSupported = true;
+        const info = adapter.info || await adapter.requestAdapterInfo().catch(()=>null);
+        if(info){
+          if(!HW.gpu && info.description) HW.gpu = info.description;
+          if(!HW.gpu && info.device) HW.gpu = info.device;
+          HW.arch = info.architecture || '';
+        }
+        // maxBufferSize hint
+        const mbs = adapter.limits?.maxBufferSize || 0;
+        if(mbs>0 && !HW.vram){
+          HW.vram = Math.max(1, Math.round(mbs/(1024**3)));
+        }
+      }
+    } catch(e){}
+  }
+
+  if(HW.gpu) HW.vram = inferVRAM(HW.gpu) || HW.vram;
+
+  // Prefill selects
+  prefillSelects();
+  updateHWDisplay();
+  gradeAll();
+  renderGradeChips();
+  renderTable();
+  renderTier();
+  buildGetStarted();
+
+  const anyDetected = HW.vram || HW.ram || HW.threads;
+  hwStatusKey = anyDetected ? (HW.vram ? 'done' : 'partial') : 'partial';
+  document.getElementById('dot').className = 'dot ' + (HW.vram ? 'ok' : 'warn');
+  document.getElementById('hw-status-text').textContent = t('hw-status-'+hwStatusKey);
+}
+
+function updateHWDisplay(){
+  document.getElementById('hv-vram').textContent = HW.vram ? HW.vram+' GB' : '—';
+  document.getElementById('hv-gpu').textContent = HW.gpu || (isAr()?'غير معروف':'Unknown');
+  document.getElementById('hv-ram').textContent = HW.ram ? '~'+HW.ram+' GB' : '—';
+  document.getElementById('hv-threads').textContent = HW.threads ? HW.threads+(isAr()?' خيط':' threads') : '—';
+  document.getElementById('hv-webgpu').textContent = HW.webgpuSupported ? (isAr()?'مدعوم':'Supported') : (isAr()?'غير مدعوم':'Not supported');
+  document.getElementById('hv-webgpu-arch').textContent = HW.arch || '—';
+}
+
+function prefillSelects(){
+  const snap=(selId,val,opts)=>{
+    const sel=document.getElementById(selId);
+    if(!val||!sel) return;
+    const closest=[...sel.options].map(o=>+o.value).filter(v=>v>0).reduce((a,b)=>Math.abs(b-val)<Math.abs(a-val)?b:a,999);
+    sel.value=closest;
+  };
+  snap('ov-vram',HW.vram,[2,4,6,8,10,12,16,20,24,32,40,48,80,96,128,192]);
+  snap('ov-ram',HW.ram,[4,8,16,32,64,128]);
+  const tSel=document.getElementById('ov-threads');
+  if(HW.threads&&tSel){
+    const opts=[...tSel.options].map(o=>+o.value);
+    const cl=opts.reduce((a,b)=>Math.abs(b-HW.threads)<Math.abs(a-HW.threads)?b:a);
+    tSel.value=cl;
+  }
+  if(HW.gpu) document.getElementById('ov-gpu').value=HW.gpu;
+}
+
+let editOpen=false;
+function toggleEdit(){
+  editOpen=!editOpen;
+  document.getElementById('hw-edit-row').classList.toggle('open',editOpen);
+  document.getElementById('apply-btns').classList.toggle('show',editOpen);
+}
+function cancelEdit(){ editOpen=false; document.getElementById('hw-edit-row').classList.remove('open'); document.getElementById('apply-btns').classList.remove('show'); }
+function applyEdit(){
+  HW.vram=+document.getElementById('ov-vram').value;
+  HW.ram=+document.getElementById('ov-ram').value;
+  HW.threads=+document.getElementById('ov-threads').value;
+  const g=document.getElementById('ov-gpu').value.trim();
+  if(g){ HW.gpu=g; const v=inferVRAM(g); if(v) HW.vram=v; document.getElementById('ov-vram').value=HW.vram||0; }
+  cancelEdit();
+  updateHWDisplay();
+  gradeAll();
+  renderGradeChips();
+  renderTable();
+  renderTier();
+  buildGetStarted();
+}
+
+// ══════════════════════════════════════
+// GRADING
+// ══════════════════════════════════════
+function gradeModel(m){
+  const mem = HW.vram || HW.ram || 0;
+  if(!mem) return {grade:'?',quant:'Q4_K_M',score:0};
+  const q4=m.sizeQ4;
+  if(HW.vram>0){
+    const r=q4/HW.vram;
+    if(r<=0.4) return {grade:'S',quant:'Q8_0',score:95};
+    if(r<=0.6) return {grade:'S',quant:'Q6_K',score:88};
+    if(r<=0.8) return {grade:'A',quant:'Q4_K_M',score:75};
+    if(r<=1.0) return {grade:'B',quant:'Q4_K_M',score:60};
+    if(HW.ram>0){
+      const rr=q4/HW.ram;
+      if(rr<=0.5) return {grade:'C',quant:'Q4_K_M',score:45};
+      if(rr<=0.8) return {grade:'D',quant:'Q3_K_M',score:28};
+    }
+    return {grade:'F',quant:'Q2_K',score:10};
+  }
+  // CPU only
+  const r=q4/HW.ram;
+  if(r<=0.25) return {grade:'B',quant:'Q4_K_M',score:62};
+  if(r<=0.4) return {grade:'C',quant:'Q4_K_M',score:48};
+  if(r<=0.65) return {grade:'D',quant:'Q3_K_M',score:30};
+  return {grade:'F',quant:'Q2_K',score:10};
+}
+
+function gradeAll(){
+  MODELS.forEach(m=>{ const r=gradeModel(m); m.grade=r.grade; m.recQuant=r.quant; m.score=r.score; });
+}
+
+// ══════════════════════════════════════
+// MODEL CATALOG
+// ══════════════════════════════════════
+const MODELS=[
+  {name:'Qwen 3.5 0.8B',provider:'Alibaba',params:.8,sizeQ4:.5,ctx:32,arch:'Dense',tasks:['chat','edge'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Ultra-tiny model for embedded and edge"},
+  {name:'Llama 3.2 1B',provider:'Meta',params:1,sizeQ4:.5,ctx:128,arch:'Dense',tasks:['chat','edge'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-09',desc:"Meta's smallest Llama for edge devices"},
+  {name:'Gemma 3 1B',provider:'Google',params:1,sizeQ4:.5,ctx:32,arch:'Dense',tasks:['chat','edge'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-03',desc:"Google's tiny Gemma for on-device"},
+  {name:'TinyLlama 1.1B',provider:'Community',params:1.1,sizeQ4:.6,ctx:2,arch:'Dense',tasks:['chat','edge'],quants:['Q4_K_M','Q6_K','Q8_0'],released:'2024-01',desc:"Ultralight model for constrained devices"},
+  {name:'Qwen 2.5 Coder 1.5B',provider:'Alibaba',params:1.5,sizeQ4:.8,ctx:32,arch:'Dense',tasks:['code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-11',desc:"Ultra-lightweight coding model"},
+  {name:'DeepSeek R1 1.5B',provider:'DeepSeek',params:1.5,sizeQ4:.8,ctx:64,arch:'Dense',tasks:['reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-01',desc:"Tiny reasoning model distilled from R1"},
+  {name:'Qwen 3 1.7B',provider:'Alibaba',params:1.7,sizeQ4:.9,ctx:32,arch:'Dense',tasks:['chat','multilingual'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Compact multilingual Qwen 3"},
+  {name:'Qwen 3.5 2B',provider:'Alibaba',params:2,sizeQ4:1.0,ctx:32,arch:'Dense',tasks:['chat','multilingual'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Small multimodal Qwen 3.5"},
+  {name:'Gemma 2 2B',provider:'Google',params:2,sizeQ4:1.0,ctx:8,arch:'Dense',tasks:['chat','edge'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-06',desc:"Google's compact open model"},
+  {name:'Llama 3.2 3B',provider:'Meta',params:3,sizeQ4:1.5,ctx:128,arch:'Dense',tasks:['chat','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-09',desc:"Lightweight Llama for mobile and edge"},
+  {name:'SmolLM3 3B',provider:'HuggingFace',params:3,sizeQ4:1.5,ctx:128,arch:'Dense',tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-07',desc:"Lightweight multilingual reasoning"},
+  {name:'Phi-3.5 Mini',provider:'Microsoft',params:3.8,sizeQ4:1.9,ctx:128,arch:'Dense',tasks:['reasoning','code','chat'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-08',desc:"Microsoft's efficient small model with long context"},
+  {name:'Phi-4 Mini Reasoning',provider:'Microsoft',params:3.8,sizeQ4:1.9,ctx:16,arch:'Dense',tasks:['reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Lightweight reasoning model"},
+  {name:'Qwen 3 4B',provider:'Alibaba',params:4,sizeQ4:2.0,ctx:32,arch:'Dense',tasks:['chat','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Compact Qwen 3 for general tasks"},
+  {name:'Gemma 3 4B',provider:'Google',params:4,sizeQ4:2.0,ctx:128,arch:'Dense',tasks:['chat','vision'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-03',desc:"Multimodal Gemma with 128K context"},
+  {name:'Qwen 3.5 4B',provider:'Alibaba',params:4,sizeQ4:2.0,ctx:32,arch:'Dense',tasks:['chat','multilingual'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Small multimodal Qwen 3.5"},
+  {name:'Mistral 7B v0.3',provider:'Mistral AI',params:7,sizeQ4:3.6,ctx:32,arch:'Dense',tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-05',desc:"High-quality 7B with sliding window attention"},
+  {name:'Qwen 2.5 7B',provider:'Alibaba',params:7,sizeQ4:3.6,ctx:128,arch:'Dense',tasks:['chat','multilingual','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-09',desc:"Strong multilingual and coding capabilities"},
+  {name:'Qwen 2.5 Coder 7B',provider:'Alibaba',params:7,sizeQ4:3.6,ctx:128,arch:'Dense',tasks:['code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-11',desc:"Dedicated coding model"},
+  {name:'DeepSeek R1 Distill 7B',provider:'DeepSeek',params:7,sizeQ4:3.6,ctx:64,arch:'Dense',tasks:['reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-01',desc:"R1 reasoning distilled into Qwen 7B"},
+  {name:'Llama 3.1 8B',provider:'Meta',params:8,sizeQ4:4.1,ctx:128,arch:'Dense',tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-07',desc:"Meta's versatile 8B — great quality/speed ratio"},
+  {name:'Qwen 3 8B',provider:'Alibaba',params:8,sizeQ4:4.1,ctx:128,arch:'Dense',tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Qwen 3 with thinking mode support"},
+  {name:'Ministral 8B',provider:'Mistral AI',params:8,sizeQ4:4.1,ctx:32,arch:'Dense',tasks:['chat'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-10',desc:"Mistral's efficient 8B model"},
+  {name:'Gemma 2 9B',provider:'Google',params:9,sizeQ4:4.6,ctx:8,arch:'Dense',tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-06',desc:"Google's best mid-size open model"},
+  {name:'Qwen 3.5 9B',provider:'Alibaba',params:9,sizeQ4:4.6,ctx:32,arch:'Dense',tasks:['chat','vision'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Multimodal Qwen 3.5 mid-size"},
+  {name:'GLM-4 9B',provider:'Zhipu AI',params:9,sizeQ4:4.6,ctx:128,arch:'Dense',tasks:['chat','multilingual','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-06',desc:"Multilingual model supporting 26 languages"},
+  {name:'Nemotron Nano 9B v2',provider:'NVIDIA',params:9,sizeQ4:4.6,ctx:128,arch:'Dense',tasks:['reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-06',desc:"Hybrid Mamba2 architecture for reasoning"},
+  {name:'Llama 3.2 11B Vision',provider:'Meta',params:11,sizeQ4:5.6,ctx:128,arch:'Dense',tasks:['chat','vision'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-09',desc:"Multimodal vision and text model"},
+  {name:'Gemma 3 12B',provider:'Google',params:12,sizeQ4:6.1,ctx:128,arch:'Dense',tasks:['chat','vision','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-03',desc:"Multimodal Gemma with 128K context"},
+  {name:'Mistral Nemo 12B',provider:'Mistral AI',params:12,sizeQ4:6.1,ctx:128,arch:'Dense',tasks:['chat','multilingual'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-07',desc:"Multilingual 12B with 128K context"},
+  {name:'Qwen 2.5 14B',provider:'Alibaba',params:14,sizeQ4:7.2,ctx:128,arch:'Dense',tasks:['chat','multilingual','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-09',desc:"Excellent quality for its size class"},
+  {name:'Qwen 3 14B',provider:'Alibaba',params:14,sizeQ4:7.2,ctx:32,arch:'Dense',tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Strong all-rounder with thinking mode"},
+  {name:'DeepSeek R1 Distill 14B',provider:'DeepSeek',params:14,sizeQ4:7.2,ctx:64,arch:'Dense',tasks:['reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-01',desc:"R1 reasoning distilled into Qwen 14B"},
+  {name:'Phi-4 14B',provider:'Microsoft',params:14,sizeQ4:7.2,ctx:16,arch:'Dense',tasks:['reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-12',desc:"Microsoft's reasoning-focused model"},
+  {name:'GPT-OSS 20B',provider:'OpenAI',params:21,sizeQ4:10.8,ctx:128,arch:'MoE',active:3.6,tasks:['chat','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-08',desc:"OpenAI's open-weight MoE with configurable reasoning"},
+  {name:'LFM2 24B',provider:'Liquid AI',params:24,sizeQ4:12.3,ctx:32,arch:'MoE',active:2.3,tasks:['chat','edge','rag'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-11',desc:"Hybrid MoE with convolution+attention layers"},
+  {name:'Mistral Small 3.1 24B',provider:'Mistral AI',params:24,sizeQ4:12.3,ctx:128,arch:'Dense',tasks:['chat','vision','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-03',desc:"Multimodal Mistral with vision support"},
+  {name:'Devstral Small 2 24B',provider:'Mistral AI',params:24,sizeQ4:12.3,ctx:256,arch:'Dense',tasks:['code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-12',desc:"Coding-focused model — 68% SWE-bench"},
+  {name:'Gemma 2 27B',provider:'Google',params:27,sizeQ4:13.8,ctx:8,arch:'Dense',tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-06',desc:"Google's largest Gemma 2 model"},
+  {name:'Gemma 3 27B',provider:'Google',params:27,sizeQ4:13.8,ctx:128,arch:'Dense',tasks:['chat','vision','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-03',desc:"Google's flagship Gemma 3 model"},
+  {name:'Qwen 3.5 27B',provider:'Alibaba',params:27.8,sizeQ4:14.2,ctx:256,arch:'Dense',tasks:['chat','vision','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Flagship native multimodal Qwen 3.5"},
+  {name:'Qwen 3 30B-A3B',provider:'Alibaba',params:30,sizeQ4:15.4,ctx:128,arch:'MoE',active:3.3,tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"MoE with only 3.3B active — extremely efficient"},
+  {name:'Nemotron 3 Nano 30B',provider:'NVIDIA',params:30,sizeQ4:15.4,ctx:1024,arch:'MoE',active:3,tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-06',desc:"MoE with 1M context and 3B active"},
+  {name:'Qwen 2.5 32B',provider:'Alibaba',params:32,sizeQ4:16.4,ctx:128,arch:'Dense',tasks:['chat','multilingual','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-09',desc:"High-quality reasoning and multilingual"},
+  {name:'Qwen 2.5 Coder 32B',provider:'Alibaba',params:32,sizeQ4:16.4,ctx:128,arch:'Dense',tasks:['code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-11',desc:"Best open-source coding model at release"},
+  {name:'Qwen 3 32B',provider:'Alibaba',params:32,sizeQ4:16.4,ctx:128,arch:'Dense',tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Qwen 3 flagship dense model"},
+  {name:'DeepSeek R1 Distill 32B',provider:'DeepSeek',params:32,sizeQ4:16.4,ctx:64,arch:'Dense',tasks:['reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-01',desc:"R1 reasoning distilled into Qwen 32B — sweet spot"},
+  {name:'EXAONE 4.0 32B',provider:'LG AI',params:32,sizeQ4:16.4,ctx:128,arch:'Dense',tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-07',desc:"Hybrid reasoning, multilingual"},
+  {name:'OLMo 2 32B',provider:'Allen AI',params:32,sizeQ4:16.4,ctx:4,arch:'Dense',tasks:['chat','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-03',desc:"Fully open research model by Allen AI"},
+  {name:'Command R 35B',provider:'Cohere',params:35,sizeQ4:17.9,ctx:128,arch:'Dense',tasks:['chat','rag'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-03',desc:"Optimized for retrieval-augmented generation"},
+  {name:'Qwen 3.5 35B-A3B',provider:'Alibaba',params:35,sizeQ4:17.9,ctx:256,arch:'MoE',active:3,tasks:['chat','vision'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Efficient multimodal MoE with 3B active"},
+  {name:'Mixtral 8x7B',provider:'Mistral AI',params:47,sizeQ4:24.1,ctx:32,arch:'MoE',active:12.9,tasks:['chat','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2023-12',desc:"MoE with 12.9B active params"},
+  {name:'Llama 3.3 70B',provider:'Meta',params:70,sizeQ4:35.9,ctx:128,arch:'Dense',tasks:['chat','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-12',desc:"Best open model at 70B class"},
+  {name:'Qwen 2.5 72B',provider:'Alibaba',params:72,sizeQ4:36.9,ctx:128,arch:'Dense',tasks:['chat','multilingual','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-09',desc:"Alibaba's flagship open model"},
+  {name:'Llama 4 Scout 17B',provider:'Meta',params:109,sizeQ4:55.8,ctx:128,arch:'MoE',active:17,tasks:['chat','vision','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"MoE with 16 experts, 17B active params"},
+  {name:'GPT-OSS 120B',provider:'OpenAI',params:117,sizeQ4:59.9,ctx:128,arch:'MoE',active:5.1,tasks:['chat','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-08',desc:"OpenAI's flagship open-weight MoE"},
+  {name:'Devstral 2 123B',provider:'Mistral AI',params:123,sizeQ4:63.0,ctx:256,arch:'Dense',tasks:['code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-12',desc:"Dense 123B coding model — 72.2% SWE-bench"},
+  {name:'Qwen 3.5 122B-A10B',provider:'Alibaba',params:122,sizeQ4:62.5,ctx:256,arch:'MoE',active:10,tasks:['chat','vision','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Large multimodal MoE with 10B active"},
+  {name:'Mixtral 8x22B',provider:'Mistral AI',params:141,sizeQ4:72.2,ctx:64,arch:'MoE',active:39,tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-04',desc:"Large MoE with 39B active params"},
+  {name:'Qwen 3 235B-A22B',provider:'Alibaba',params:235,sizeQ4:120.4,ctx:128,arch:'MoE',active:22,tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Massive MoE with 22B active — frontier quality"},
+  {name:'Qwen 3.5 397B-A17B',provider:'Alibaba',params:397,sizeQ4:203.4,ctx:256,arch:'MoE',active:17,tasks:['chat','vision','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2026-02',desc:"Largest multimodal Qwen 3.5 MoE"},
+  {name:'Llama 4 Maverick 17B-128E',provider:'Meta',params:400,sizeQ4:204.9,ctx:1024,arch:'MoE',active:17,tasks:['chat','vision','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-04',desc:"Multimodal MoE — 17B active, 1M context"},
+  {name:'Llama 3.1 405B',provider:'Meta',params:405,sizeQ4:207.5,ctx:128,arch:'Dense',tasks:['chat','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2024-07',desc:"Largest open-weight dense model by Meta"},
+  {name:'Qwen 3 Coder 480B',provider:'Alibaba',params:480,sizeQ4:245.9,ctx:256,arch:'MoE',active:35,tasks:['code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-07',desc:"Largest open coding MoE — 35B active"},
+  {name:'DeepSeek R1',provider:'DeepSeek',params:671,sizeQ4:343.7,ctx:64,arch:'MoE',active:37,tasks:['reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-01',desc:"Massive MoE reasoning model — 37B active"},
+  {name:'DeepSeek V3.1',provider:'DeepSeek',params:671,sizeQ4:343.7,ctx:128,arch:'MoE',active:37,tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-08',desc:"Improved V3 with hybrid thinking and tool use"},
+  {name:'DeepSeek V3.2',provider:'DeepSeek',params:685,sizeQ4:350.9,ctx:128,arch:'MoE',active:37,tasks:['chat','code','reasoning'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-12',desc:"State-of-the-art MoE — 37B active params"},
+  {name:'Kimi K2',provider:'Moonshot AI',params:1000,sizeQ4:512.2,ctx:128,arch:'MoE',active:32,tasks:['chat','reasoning','code'],quants:['Q4_K_M','Q6_K','Q8_0','F16'],released:'2025-07',desc:"1T MoE — 384 experts, 32B active, agentic coding"},
+];
+MODELS.forEach(m=>{ m.grade='?'; m.recQuant='Q4_K_M'; m.score=0; });
+
+// ══════════════════════════════════════
+// FILTER STATE
+// ══════════════════════════════════════
+let activeGrade='all', activeTask='all', activeTierTask='all', hideF=false;
+let sortCol='grade', sortAsc=true;
+
+function setTask(btn){
+  activeTask=btn.dataset.task;
+  document.querySelectorAll('[data-task]').forEach(b=>b.classList.remove('on'));
+  document.querySelectorAll(`[data-task="${activeTask}"]`).forEach(b=>b.classList.add('on'));
+  renderTable();
+}
+function setTierTask(btn){
+  activeTierTask=btn.dataset.tierTask;
+  document.querySelectorAll('[data-tier-task]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderTier();
+}
+function toggleHideF(btn){ hideF=!hideF; btn.classList.toggle('on',hideF); renderTier(); }
+
+function sortBy(col){
+  if(sortCol===col) sortAsc=!sortAsc; else { sortCol=col; sortAsc=true; }
+  document.querySelectorAll('thead th').forEach(th=>th.classList.remove('sorted'));
+  const el=document.getElementById('th-'+col);
+  if(el) el.classList.add('sorted');
+  renderTable();
+}
+
+function getFiltered(){
+  const q=(document.getElementById('fsearch').value||'').toLowerCase();
+  const sort=document.getElementById('fsel').value;
+  const gOrder={S:0,A:1,B:2,C:3,D:4,F:5,'?':6};
+  return MODELS.filter(m=>{
+    if(activeGrade!=='all' && m.grade!==activeGrade) return false;
+    if(activeTask!=='all' && !m.tasks.includes(activeTask)) return false;
+    if(q && !m.name.toLowerCase().includes(q) && !m.provider.toLowerCase().includes(q)) return false;
+    return true;
+  }).sort((a,b)=>{
+    let v;
+    if(sortCol==='grade') v=(gOrder[a.grade]??6)-(gOrder[b.grade]??6)||(a.params-b.params);
+    else if(sortCol==='name') v=a.name.localeCompare(b.name);
+    else if(sortCol==='provider') v=a.provider.localeCompare(b.provider);
+    else if(sortCol==='params'||sortCol==='sizeQ4'||sortCol==='ctx') v=a[sortCol]-b[sortCol];
+    else v=0;
+    // also respect fsel
+    if(sort==='params_asc') v=a.params-b.params;
+    else if(sort==='params_desc') v=b.params-a.params;
+    else if(sort==='newest') v=b.released.localeCompare(a.released);
+    else if(sort==='vram') v=a.sizeQ4-b.sizeQ4;
+    return sortAsc ? v : -v;
+  });
+}
+
+// ══════════════════════════════════════
+// RENDER GRADE CHIPS
+// ══════════════════════════════════════
+function renderGradeChips(){
+  const grades=['S','A','B','C','D','F'];
+  const gclr={S:'var(--cs)',A:'var(--ca)',B:'var(--cb)',C:'var(--cc)',D:'var(--cd)',F:'var(--cf)'};
+  const counts={};
+  grades.forEach(g=>counts[g]=MODELS.filter(m=>m.grade===g).length);
+  document.getElementById('grade-row').innerHTML=`
+    <div class="gchip ${activeGrade==='all'?'on':''}" onclick="setGrade('all',this)">
+      <span style="color:var(--t2);font-size:11px">${t('grade-all')}</span>
+      <span class="gchip-all-count">${MODELS.length}</span>
+    </div>
+    ${grades.map(g=>`
+      <div class="gchip ${activeGrade===g?'on':''}" onclick="setGrade('${g}',this)">
+        <span class="gl" style="color:${gclr[g]}">${g}</span>
+        <span class="gs">${t('grades')[g]||g}</span>
+        <span class="gs">${counts[g]}</span>
+      </div>`).join('')}
+  `;
+}
+
+function setGrade(g,el){
+  activeGrade=g;
+  document.querySelectorAll('.gchip').forEach(c=>c.classList.remove('on'));
+  el.classList.add('on');
+  renderTable();
+}
+
+// ══════════════════════════════════════
+// RENDER TABLE
+// ══════════════════════════════════════
+function renderTable(){
+  const list=getFiltered();
+  const tbody=document.getElementById('tbl-body');
+  const lang=TXT[currentLang];
+  if(!list.length){ tbody.innerHTML=`<tr><td colspan="10" class="tbl-empty">${t('tbl-empty')}</td></tr>`; return; }
+  const paramStr=p=>p>=1000?(p/1000).toFixed(0)+'T':p+'B';
+  tbody.innerHTML=list.map(m=>`
+    <tr>
+      <td class="td-grade"><span class="gbadge g-${m.grade}">${m.grade}</span></td>
+      <td class="td-name">${m.name}</td>
+      <td class="td-provider">${m.provider}</td>
+      <td class="td-params">${paramStr(m.params)}</td>
+      <td class="td-size">${m.sizeQ4} GB</td>
+      <td class="td-ctx">${m.ctx}K</td>
+      <td class="td-arch"><span class="arch-pill${m.arch==='MoE'?' moe':''}">${lang.arch[m.arch]||m.arch}${m.active?` · ${m.active}B`:''}</span></td>
+      <td class="td-tasks">${m.tasks.map(t2=>`<span class="task-tag tt-${t2}">${lang.tasks[t2]||t2}</span>`).join('')}</td>
+      <td class="td-quant">${m.recQuant}</td>
+      <td class="td-desc">${m.desc}</td>
+    </tr>`).join('');
+}
+
+// ══════════════════════════════════════
+// RENDER TIER
+// ══════════════════════════════════════
+function renderTier(){
+  const grades=['S','A','B','C','D','F'];
+  const gclr={S:'var(--cs)',A:'var(--ca)',B:'var(--cb)',C:'var(--cc)',D:'var(--cd)',F:'var(--cf)'};
+  const lang=TXT[currentLang];
+  const body=document.getElementById('tier-body');
+  body.innerHTML=grades.filter(g=>!(hideF&&g==='F')).map(g=>{
+    const models=MODELS.filter(m=>{
+      if(m.grade!==g) return false;
+      if(activeTierTask!=='all'&&!m.tasks.includes(activeTierTask)) return false;
+      return true;
+    });
+    return `<div class="tier-section">
+      <div class="tier-header" style="border-right:3px solid ${gclr[g]}">
+        <span class="tier-grade-letter" style="color:${gclr[g]}">${g}</span>
+        <span class="tier-grade-name">${lang.grades[g]||g}</span>
+        <span class="tier-grade-count">${models.length} ${isAr()?'نموذج':'models'}</span>
+      </div>
+      <div class="tier-models">
+        ${models.length?models.map(m=>`
+          <div class="tier-model-chip">
+            <span>${m.name}</span>
+            <span class="tier-chip-size">${m.sizeQ4}GB</span>
+          </div>`).join('')
+          :`<div class="tier-empty">${isAr()?'لا توجد نماذج':'No models'}</div>`}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════
+// DOCS CONTENT
+// ══════════════════════════════════════
+const DOCS_DATA = {
+  ar: [
+    {
+      title:'المَعامِل (Parameters)',
+      body:`<p>حين ترى "7B" أو "70B"، هذا عدد المعاملات بالمليار. كلما زادت، كان النموذج أذكى وأكثر قدرة، لكنه يحتاج ذاكرة أكبر وأبطأ في التوليد.</p>
+      <table class="doc-table"><thead><tr><th>الحجم</th><th>الجودة</th><th>الاستخدام المُوصى</th></tr></thead><tbody>
+      <tr><td>1–3B</td><td>سريع جداً</td><td>الأجهزة الطرفية، التجريب</td></tr>
+      <tr><td>7–8B</td><td>جيد</td><td>المهام اليومية</td></tr>
+      <tr><td>13–14B</td><td>أفضل</td><td>نقطة التوازن المثلى</td></tr>
+      <tr><td>27–34B</td><td>ممتاز</td><td>مهام معقدة</td></tr>
+      <tr><td>70B+</td><td>حدودي</td><td>يحتاج عتاداً قوياً</td></tr>
+      </tbody></table>`
+    },
+    {
+      title:'الكَمّ الكمي (Quantization)',
+      body:`<p>يُقلّل الكَمّ الكمي دقة أوزان النموذج لتقليص حجمه وتسريعه، مع خسارة طفيفة في الجودة. Q4_K_M هو التوازن الأمثل.</p>
+      <div class="size-bar-row">
+        ${[['F16','100%',100],['Q8_0','~99%',99],['Q6_K','~95%',95],['Q4_K_M','~88%',88],['Q3_K_M','~75%',75],['Q2_K','~60%',60]].map(([n,q,w])=>
+          `<div class="size-bar-item"><span class="size-bar-label">${n}</span><div class="size-bar-track"><div class="size-bar-fill" style="width:${w}%"></div></div><span class="size-bar-val">${q}</span></div>`
+        ).join('')}
+      </div>
+      <p><code>Q4_K_M</code> هو الأكثر شيوعاً وتوصية — جودة عالية وحجم معقول.</p>`
+    },
+    {
+      title:'VRAM',
+      body:`<p>VRAM هي ذاكرة بطاقة الرسوميات. لتشغيل نموذج بالكامل على GPU، يجب أن يسع ملف النموذج المضغوط في VRAM.</p>
+      <p>إذا تجاوز الحجم الـ VRAM، يحدث تقسيم بين GPU وRAM وهو أبطأ بكثير — أو يفشل التحميل كلياً.</p>
+      <p>معادلة تقريبية: <code>VRAM = المعاملات × البتات ÷ 8 ÷ 1024³ + تكاليف إضافية</code></p>`
+    },
+    {
+      title:'MoE (Mixture of Experts)',
+      body:`<p>نماذج MoE تقسّم معاملاتها إلى "خبراء"، وفي كل رمز تُفعّل عدداً محدوداً منهم فقط. مثلاً Mixtral 8x7B لديه 47B معامل لكن يُفعّل ~13B فقط في كل خطوة.</p>
+      <p>النتيجة: جودة نموذج كبير بسرعة نموذج صغير. لكن الحجم الكامل يجب أن يسع في الذاكرة.</p>`
+    },
+    {
+      title:'طول السياق (Context Length)',
+      body:`<p>طول السياق هو عدد الرموز التي يمكن للنموذج معالجتها دفعة واحدة. "128K ctx" يعني نحو 100,000 كلمة.</p>
+      <p>سياق أطول مفيد للوثائق الطويلة، لكنه يستهلك ذاكرة أكبر. معظم الاستخدام اليومي يكفيه 4K–8K.</p>`
+    },
+    {
+      title:'GGUF',
+      body:`<p>GGUF هو صيغة الملف التي تستخدمها أدوات llama.cpp و Ollama و LM Studio. يخزّن الأوزان المضغوطة في ملف واحد جاهز للتشغيل.</p>
+      <p>هذا ما تبحث عنه على HuggingFace لتشغيل النماذج محلياً.</p>`
+    },
+    {
+      title:'عرض النطاق الذاكري (Memory Bandwidth)',
+      body:`<p>عرض النطاق الذاكري بالـ GB/s يحدد سرعة التوليد. استنتاج النماذج محدود بسرعة قراءة الأوزان من الذاكرة — لا بالحساب.</p>
+      <p>لهذا Apple Silicon يُشغّل نماذج كبيرة بسرعة مفاجئة رغم أنه ليس GPU مخصص — عرض النطاق موحّد وعالٍ.</p>`
+    },
+  ],
+  en: [
+    {
+      title:'Parameters',
+      body:`<p>When you see "7B" or "70B", that's the number of parameters in billions. More parameters = smarter but slower and heavier.</p>
+      <table class="doc-table"><thead><tr><th>Size</th><th>Quality</th><th>Best for</th></tr></thead><tbody>
+      <tr><td>1–3B</td><td>Fast</td><td>Edge devices, experiments</td></tr>
+      <tr><td>7–8B</td><td>Good</td><td>Daily tasks</td></tr>
+      <tr><td>13–14B</td><td>Better</td><td>Sweet spot</td></tr>
+      <tr><td>27–34B</td><td>Great</td><td>Complex tasks</td></tr>
+      <tr><td>70B+</td><td>Excellent</td><td>Needs serious hardware</td></tr>
+      </tbody></table>`
+    },
+    {
+      title:'Quantization',
+      body:`<p>Quantization reduces the precision of model weights to make it smaller and faster, at the cost of some quality. Q4_K_M is the best balance.</p>
+      <div class="size-bar-row">
+        ${[['F16','100%',100],['Q8_0','~99%',99],['Q6_K','~95%',95],['Q4_K_M','~88%',88],['Q3_K_M','~75%',75],['Q2_K','~60%',60]].map(([n,q,w])=>
+          `<div class="size-bar-item"><span class="size-bar-label">${n}</span><div class="size-bar-track"><div class="size-bar-fill" style="width:${w}%"></div></div><span class="size-bar-val">${q}</span></div>`
+        ).join('')}
+      </div>
+      <p><code>Q4_K_M</code> is the most popular and recommended — best balance of size and quality.</p>`
+    },
+    {
+      title:'VRAM',
+      body:`<p>VRAM is your GPU's memory. To run a model fully on GPU, the quantized file must fit in VRAM. If it doesn't fit, the model splits between GPU and RAM (much slower) or fails to load.</p>
+      <p>Rough formula: <code>VRAM = params × bits ÷ 8 ÷ 1024³ + overhead</code></p>`
+    },
+    {
+      title:'MoE (Mixture of Experts)',
+      body:`<p>MoE models split parameters into "experts" and only activate a few per token. Mixtral 8x7B has 47B total params but activates ~13B per step — quality of a large model, speed of a small one.</p>
+      <p>The full model still needs to fit in memory, even though only part of it activates at inference time.</p>`
+    },
+    {
+      title:'Context Length',
+      body:`<p>Context length is how many tokens the model can process at once. "128K ctx" means ~100,000 words. Longer context is great for documents but uses more memory. Most daily use is fine with 4K–8K.</p>`
+    },
+    {
+      title:'GGUF Format',
+      body:`<p>GGUF is the file format used by llama.cpp, Ollama, and LM Studio. It stores quantized weights in a single ready-to-run file. When downloading models from HuggingFace for local use, look for the GGUF version.</p>`
+    },
+    {
+      title:'Memory Bandwidth',
+      body:`<p>Memory bandwidth (GB/s) determines inference speed. LLM inference is limited by how fast you can read weights from memory — not by computation.</p>
+      <p>This is why Apple Silicon Macs run surprisingly large models — their unified memory bandwidth is very high.</p>`
+    },
+  ]
+};
+
+function buildDocs(){
+  const data=DOCS_DATA[currentLang];
+  document.getElementById('docs-body').innerHTML=data.map(d=>`
+    <details class="doc-section">
+      <summary><span class="doc-section-title">${d.title}</span><span class="doc-chevron">▼</span></summary>
+      <div class="doc-body">${d.body}</div>
+    </details>`).join('');
+}
+
+// ══════════════════════════════════════
+// WHY CONTENT
+// ══════════════════════════════════════
+const WHY_DATA = {
+  ar: `
+    <div class="why-section">
+      <h3>كيف يعمل الموقع</h3>
+      <p>يعمل الموقع بالكامل في متصفحك. عند زيارته، نستخدم واجهات برمجية للكشف عن GPU وCPU والذاكرة — ثم نحسب أي نماذج الذكاء الاصطناعي يمكن تشغيلها وبأي سرعة. لا تُرسَل أي بيانات إلى أي خادم.</p>
+      <div class="why-flow">
+        <div class="why-step">كشف</div><div class="why-arrow">←</div>
+        <div class="why-step">مطابقة GPU</div><div class="why-arrow">←</div>
+        <div class="why-step">حساب الدرجة</div><div class="why-arrow">←</div>
+        <div class="why-step">S / A / B / C / D / F</div>
+      </div>
+    </div>
+    <div class="why-section">
+      <h3>كشف العتاد</h3>
+      <p>نستخدم ثلاث واجهات برمجية للكشف عن عتادك دون الحاجة لتثبيت أي شيء:</p>
+      <p><strong style="color:var(--acc)">WebGL</strong> — الأقوى للكشف عن اسم GPU بالضبط:</p>
+      <pre>const canvas = document.createElement("canvas");
+const gl = canvas.getContext("webgl2");
+const ext = gl.getExtension("WEBGL_debug_renderer_info");
+const gpu = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+// → "ANGLE (NVIDIA, NVIDIA GeForce RTX 4090, ...)"
+// → "Apple M4 Pro GPU"</pre>
+      <p><strong style="color:var(--acc)">WebGPU</strong> — معلومات المعمارية:</p>
+      <pre>const adapter = await navigator.gpu.requestAdapter();
+const info = adapter.info;
+// info.device → "nvidia geforce rtx 4090"
+// info.architecture → "ampere"</pre>
+      <p><strong style="color:var(--acc)">Navigator</strong> — المعالج والذاكرة:</p>
+      <pre>navigator.hardwareConcurrency // → 16 خيطاً
+navigator.deviceMemory        // → 8 (GB، تقريبي)</pre>
+    </div>
+    <div class="why-section">
+      <h3>قاعدة بيانات GPU</h3>
+      <p>بعد معرفة اسم GPU، نبحث عنه في قاعدة بيانات مضمّنة تضم ~60 GPU من NVIDIA وAMD وIntel وApple Silicon. كل مدخل يحتوي على سعة VRAM.</p>
+    </div>
+    <div class="why-section">
+      <h3>حساب VRAM</h3>
+      <p>لكل نموذج قيمة VRAM مُحسوبة مسبقاً لكل مستوى ضغط:</p>
+      <pre>VRAM (GB) = المعاملات × البتات ÷ 8 ÷ 1024³ + تكاليف إضافية</pre>
+      <p>مثال: نموذج 70B بمستوى Q4_K_M (4 بت) يحتاج ~35 GB + 1-2 GB تكاليف KV cache.</p>
+    </div>
+    <div class="why-section">
+      <h3>مقياس الدرجات</h3>
+      <table class="grade-scale-table">
+        <thead><tr><th>الدرجة</th><th>المعنى</th><th>المعيار</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--cs)">S</td><td>ممتاز — سريع، هامش ذاكرة وافر</td><td>≤ 40% من VRAM</td></tr>
+          <tr><td style="color:var(--ca)">A</td><td>جيد جداً — سريع ومريح</td><td>≤ 60% من VRAM</td></tr>
+          <tr><td style="color:var(--cb)">B</td><td>جيد — قابل للاستخدام</td><td>≤ 80% من VRAM</td></tr>
+          <tr><td style="color:var(--cc)">C</td><td>محدود — يحتاج استدلال CPU</td><td>≤ 50% من RAM</td></tr>
+          <tr><td style="color:var(--cd)">D</td><td>ثقيل — بطيء جداً</td><td>≤ 80% من RAM</td></tr>
+          <tr><td style="color:var(--cf)">F</td><td>غير متاح — لا يسع في الذاكرة</td><td>تجاوز الحد</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="why-section">
+      <h3>Apple Silicon: الذاكرة الموحّدة</h3>
+      <p>أجهزة Mac بشرائح Apple Silicon تشترك في الذاكرة بين CPU وGPU. هذا يعني إمكانية استخدام ~75% من إجمالي RAM للنماذج — أكثر بكثير من GPUs المنفصلة. MacBook Pro بـ 36 GB يمكنه تشغيل نماذج تحتاج ~27 GB، بينما PC بـ GPU 8 GB لا يستطيع.</p>
+    </div>
+    <div class="why-section">
+      <h3>الخصوصية</h3>
+      <div class="privacy-box"><p>كل الكشف والحساب يتم في متصفحك. لا تُرسَل أي بيانات — اسم GPU والذاكرة لا تغادر جهازك أبداً.</p></div>
+    </div>`,
+  en: `
+    <div class="why-section">
+      <h3>How it works</h3>
+      <p>This site runs entirely in your browser. When you visit, we use browser APIs to detect your GPU, CPU, and memory — then calculate which AI models can run on your hardware. No data is sent to any server.</p>
+      <div class="why-flow">
+        <div class="why-step">Detect</div><div class="why-arrow">→</div>
+        <div class="why-step">Match GPU</div><div class="why-arrow">→</div>
+        <div class="why-step">Score</div><div class="why-arrow">→</div>
+        <div class="why-step">S / A / B / C / D / F</div>
+      </div>
+    </div>
+    <div class="why-section">
+      <h3>Hardware detection</h3>
+      <p>We use three browser APIs — no extensions or installs needed:</p>
+      <p><strong style="color:var(--acc)">WebGL</strong> — best source for exact GPU name:</p>
+      <pre>const canvas = document.createElement("canvas");
+const gl = canvas.getContext("webgl2");
+const ext = gl.getExtension("WEBGL_debug_renderer_info");
+const gpu = gl.getParameter(ext.UNMASKED_RENDERER_WEBGL);
+// → "ANGLE (NVIDIA, NVIDIA GeForce RTX 4090, ...)"
+// → "Apple M4 Pro GPU"</pre>
+      <p><strong style="color:var(--acc)">WebGPU</strong> — architecture info:</p>
+      <pre>const adapter = await navigator.gpu.requestAdapter();
+const info = adapter.info;
+// info.device → "nvidia geforce rtx 4090"
+// info.architecture → "ampere"</pre>
+      <p><strong style="color:var(--acc)">Navigator</strong> — CPU threads and RAM:</p>
+      <pre>navigator.hardwareConcurrency // → 16
+navigator.deviceMemory        // → 8 (GB, approximate)</pre>
+    </div>
+    <div class="why-section">
+      <h3>GPU database</h3>
+      <p>Once we identify your GPU, we look it up in a built-in database of ~60 GPUs (NVIDIA, AMD, Intel) and Apple Silicon chips. Each entry contains the VRAM capacity used for scoring.</p>
+    </div>
+    <div class="why-section">
+      <h3>VRAM calculation</h3>
+      <p>Each model has a pre-calculated VRAM requirement for Q4_K_M quantization:</p>
+      <pre>VRAM (GB) = params × bits ÷ 8 ÷ 1024³ + overhead</pre>
+      <p>Example: a 70B model at Q4_K_M (4-bit) needs ~35 GB + ~1–2 GB KV cache overhead.</p>
+    </div>
+    <div class="why-section">
+      <h3>Grade scale</h3>
+      <table class="grade-scale-table">
+        <thead><tr><th>Grade</th><th>Meaning</th><th>Threshold</th></tr></thead>
+        <tbody>
+          <tr><td style="color:var(--cs)">S</td><td>Excellent — fast inference, plenty of headroom</td><td>≤ 40% of VRAM</td></tr>
+          <tr><td style="color:var(--ca)">A</td><td>Great — good speed, comfortable fit</td><td>≤ 60% of VRAM</td></tr>
+          <tr><td style="color:var(--cb)">B</td><td>Good — usable, fits in VRAM</td><td>≤ 80% of VRAM</td></tr>
+          <tr><td style="color:var(--cc)">C</td><td>Tight — needs CPU offload</td><td>≤ 50% of RAM</td></tr>
+          <tr><td style="color:var(--cd)">D</td><td>Barely — very slow output</td><td>≤ 80% of RAM</td></tr>
+          <tr><td style="color:var(--cf)">F</td><td>Too heavy — won't fit in memory</td><td>Exceeds limit</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="why-section">
+      <h3>Apple Silicon: unified memory</h3>
+      <p>Apple Silicon Macs share memory between CPU and GPU. The model can use up to ~75% of total RAM — far more than discrete GPUs limited to their VRAM. A MacBook Pro with 36 GB can run models needing ~27 GB, while a PC with an 8 GB GPU cannot.</p>
+    </div>
+    <div class="why-section">
+      <h3>Privacy</h3>
+      <div class="privacy-box"><p>All detection and scoring happens in your browser. No data is sent to any server. Your GPU name and memory figures never leave your device.</p></div>
+    </div>`
+};
+
+function buildWhy(){
+  document.getElementById('why-body').innerHTML=WHY_DATA[currentLang];
+}
+
+// ══════════════════════════════════════
+// GET STARTED PAGE
+// ══════════════════════════════════════
+function buildGetStarted(){
+  const ar = isAr();
+
+  // Dynamic recommendation based on detected hardware
+  const bestModels = MODELS.filter(m=>m.grade==='S'||m.grade==='A').sort((a,b)=>b.params-a.params);
+  const recModel = bestModels.length ? bestModels[0] : MODELS.find(m=>m.grade==='B') || MODELS[10];
+  const recText = ar
+    ? `بناءً على عتادك المكشوف، نوصي بالبدء بـ <strong>${recModel?.name||'Llama 3.1 8B'}</strong> — ${recModel?.sizeQ4||4.1} GB بمستوى Q4_K_M`
+    : `Based on your detected hardware, we recommend starting with <strong>${recModel?.name||'Llama 3.1 8B'}</strong> — ${recModel?.sizeQ4||4.1} GB at Q4_K_M`;
+  const noHW = !HW.vram && !HW.ram;
+  const recWrap = document.getElementById('gs-rec-wrap');
+  if(recWrap) recWrap.innerHTML = noHW ? '' : `
+    <div class="gs-rec-box">
+      <div class="gs-rec-icon">🎯</div>
+      <div class="gs-rec-text">${ar?'توصية بناءً على جهازك':'Recommendation based on your hardware'}<br>${recText}</div>
+    </div>`;
+
+  // TOOLS
+  const tools = [
+    {
+      icon:'🦙', name:'Ollama', platform: ar?'ويندوز · ماك · لينكس':'Windows · Mac · Linux',
+      color:'rgba(255,94,58,0.15)', border:'rgba(255,94,58,0.3)',
+      desc: ar
+        ? 'الأداة الأكثر شيوعاً لتشغيل النماذج محلياً عبر سطر الأوامر. سريعة الإعداد، تدعم مئات النماذج.'
+        : 'The most popular CLI tool for running models locally. Fast setup, hundreds of models supported.',
+      tags: ar ? ['سطر أوامر','مفتوح المصدر','مجاني'] : ['CLI','Open Source','Free'],
+      link:'https://ollama.com', linkTxt:'ollama.com'
+    },
+    {
+      icon:'🖥️', name:'LM Studio', platform: ar?'ويندوز · ماك · لينكس':'Windows · Mac · Linux',
+      color:'rgba(132,204,22,0.1)', border:'rgba(132,204,22,0.25)',
+      desc: ar
+        ? 'واجهة رسومية كاملة — لا سطر أوامر. الأفضل لمن يريد تجربة سهلة فوراً.'
+        : 'Full GUI — no terminal needed. Best for a plug-and-play experience with zero friction.',
+      tags: ar ? ['واجهة رسومية','سهل الاستخدام','مجاني'] : ['GUI','Beginner Friendly','Free'],
+      link:'https://lmstudio.ai', linkTxt:'lmstudio.ai'
+    },
+    {
+      icon:'📱', name:'Locally AI', platform: ar?'iOS · iPadOS':'iOS · iPadOS',
+      color:'rgba(96,165,250,0.1)', border:'rgba(96,165,250,0.25)',
+      desc: ar
+        ? 'تطبيق iOS لتشغيل النماذج على iPhone وiPad. يعمل offline بالكامل، مثالي للخصوصية.'
+        : 'Run models directly on iPhone and iPad. Fully offline, privacy-first, no server needed.',
+      tags: ar ? ['iOS','بدون إنترنت','خصوصية'] : ['iOS','Offline','Privacy'],
+      link:'https://apps.apple.com/app/locally-ai/id6504907629', linkTxt:'App Store'
+    },
+    {
+      icon:'🤖', name:'mosAId · مساعد', platform: ar?'أندرويد':'Android',
+      color:'rgba(212,255,71,0.08)', border:'rgba(212,255,71,0.3)',
+      desc: ar
+        ? 'مساعد AI عربي يعمل بالكامل offline على أندرويد. الوحيد المبني للناطقين بالعربية أصالةً.'
+        : 'Arabic-first AI assistant running fully offline on Android. Built for Arabic speakers natively.',
+      tags: ar ? ['أندرويد','عربي','بدون إنترنت','مفتوح المصدر'] : ['Android','Arabic','Offline','Open Source'],
+      link:'https://github.com/IYousefI/mosAId', linkTxt:'GitHub'
+    },
+  ];
+
+  const toolsWrap = document.getElementById('gs-tools-wrap');
+  if(toolsWrap) toolsWrap.innerHTML = `
+    <p class="gs-steps-title" style="margin-bottom:14px">${ar?'اختر أداتك':'Choose your tool'}</p>
+    <div class="gs-tools">
+      ${tools.map(tool=>`
+        <div class="gs-tool-card">
+          <div class="gs-tool-top">
+            <div class="gs-tool-icon" style="background:${tool.color};border:1px solid ${tool.border}">${tool.icon}</div>
+            <div>
+              <div class="gs-tool-name">${tool.name}</div>
+              <div class="gs-tool-platform">${tool.platform}</div>
+            </div>
+          </div>
+          <div class="gs-tool-desc">${tool.desc}</div>
+          <div class="gs-tool-tags">${tool.tags.map(tg=>`<span class="gs-tool-tag">${tg}</span>`).join('')}</div>
+          <a class="gs-tool-link" href="${tool.link}" target="_blank" rel="noopener">↗ ${tool.linkTxt}</a>
+        </div>`).join('')}
+    </div>`;
+
+  // STEPS (Ollama-based, simplest path)
+  const modelName = recModel?.name || 'llama3.1:8b';
+  const ollamaModel = modelName.toLowerCase().replace(/\s+/g,':').replace('llama:3.1:8b','llama3.1:8b').replace('qwen:3:8b','qwen3:8b').replace(/[^a-z0-9.:]/g,'');
+
+  const steps = ar ? [
+    {
+      n:'01', title:'ثبّت Ollama',
+      desc:'نزّل Ollama من الموقع الرسمي وثبّته على جهازك. يعمل على ويندوز وماك ولينكس.',
+      code: null, link:'https://ollama.com'
+    },
+    {
+      n:'02', title:'حمّل النموذج وشغّله',
+      desc:`أمر واحد يحمّل النموذج ويشغّله مباشرة. أول تشغيل يستغرق وقتاً لتحميل الملف.`,
+      code:`<span class="cmd">ollama run</span> ${ollamaModel}`
+    },
+    {
+      n:'03', title:'ابدأ المحادثة',
+      desc:'بعد تحميل النموذج، اكتب سؤالك مباشرة في الطرفية. أو استخدم LM Studio للواجهة الرسومية.',
+      code:null
+    },
+    {
+      n:'04', title:'استخدم واجهة رسومية (اختياري)',
+      desc:'إذا كنت تفضّل واجهة مرئية، افتح LM Studio وهو سيتعرف على نماذجك المثبّتة تلقائياً.',
+      code:null
+    },
+  ] : [
+    {
+      n:'01', title:'Install Ollama',
+      desc:'Download and install Ollama from the official site. Works on Windows, Mac, and Linux.',
+      code:null, link:'https://ollama.com'
+    },
+    {
+      n:'02', title:'Pull and run a model',
+      desc:`One command downloads and runs the model. First run takes time to download the file.`,
+      code:`<span class="cmd">ollama run</span> ${ollamaModel}`
+    },
+    {
+      n:'03', title:'Start chatting',
+      desc:'After loading, type your prompt directly in the terminal. Or open LM Studio for a GUI.',
+      code:null
+    },
+    {
+      n:'04', title:'Use a GUI (optional)',
+      desc:'If you prefer a visual interface, open LM Studio — it automatically finds your installed models.',
+      code:null
+    },
+  ];
+
+  const stepsWrap = document.getElementById('gs-steps-wrap');
+  if(stepsWrap) stepsWrap.innerHTML = `
+    <p class="gs-steps-title">${ar?'خطوات البداية السريعة (مع Ollama)':'Quick start steps (with Ollama)'}</p>
+    <div class="gs-steps">
+      ${steps.map(s=>`
+        <div class="gs-step">
+          <div class="gs-step-num">${s.n}</div>
+          <div class="gs-step-body">
+            <div class="gs-step-title">${s.title}</div>
+            <div class="gs-step-desc">${s.desc}${s.link?` <a href="${s.link}" target="_blank" rel="noopener" style="color:var(--acc);text-decoration:none">↗ ${ar?'زيارة الموقع':'Visit site'}</a>`:''}
+            </div>
+            ${s.code?`<div class="gs-step-code">${s.code}</div>`:''}
+          </div>
+        </div>`).join('')}
+    </div>`;
+}
+
+// ══════════════════════════════════════
+// NAV
+// ══════════════════════════════════════
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-link[data-page]').forEach(l=>l.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.getElementById('nl-'+page).classList.add('active');
+  if(page==='start') buildGetStarted();
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
+applyTxt();
+detect();
+</script>
+</body>
+</html>
