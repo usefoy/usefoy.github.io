@@ -1286,15 +1286,6 @@ function buildGetStarted(){
       link:'https://lmstudio.ai', linkTxt:'lmstudio.ai'
     },
     {
-      icon:'📱', name:'Locally AI', platform: ar?'iOS · iPadOS':'iOS · iPadOS',
-      color:'rgba(96,165,250,0.1)', border:'rgba(96,165,250,0.25)',
-      desc: ar
-        ? 'تطبيق iOS لتشغيل النماذج على iPhone وiPad. يعمل offline بالكامل، مثالي للخصوصية.'
-        : 'Run models directly on iPhone and iPad. Fully offline, privacy-first, no server needed.',
-      tags: ar ? ['iOS','بدون إنترنت','خصوصية'] : ['iOS','Offline','Privacy'],
-      link:'https://apps.apple.com/app/locally-ai/id6504907629', linkTxt:'App Store'
-    },
-    {
       icon:'🤖', name:'mosAId · مساعد', platform: ar?'أندرويد':'Android',
       color:'rgba(212,255,71,0.08)', border:'rgba(212,255,71,0.3)',
       desc: ar
@@ -1302,6 +1293,15 @@ function buildGetStarted(){
         : 'Arabic-first AI assistant running fully offline on Android. Built for Arabic speakers natively.',
       tags: ar ? ['أندرويد','عربي','بدون إنترنت','مفتوح المصدر'] : ['Android','Arabic','Offline','Open Source'],
       link:'https://github.com/IYousefI/mosAId', linkTxt:'GitHub'
+    },
+    {
+      icon:'📱', name:'Locally AI', platform: ar?'iOS · iPadOS':'iOS · iPadOS',
+      color:'rgba(96,165,250,0.1)', border:'rgba(96,165,250,0.25)',
+      desc: ar
+        ? 'تطبيق iOS لتشغيل النماذج على iPhone وiPad. يعمل offline بالكامل، مثالي للخصوصية.'
+        : 'Run models directly on iPhone and iPad. Fully offline, privacy-first, no server needed.',
+      tags: ar ? ['iOS','بدون إنترنت','خصوصية'] : ['iOS','Offline','Privacy'],
+      link:'https://apps.apple.com/app/locally-ai/id6504907629', linkTxt:'App Store'
     },
   ];
 
