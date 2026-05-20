@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d1117">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>مُصحِّح | BubbleScan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Arabic:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --s1: #161b22;
+  --s2: #1c2230;
+  --border: #212940;
+  --accent: #3df0b0;
+  --blue: #4fa3ff;
+  --warn: #ff5f5f;
+  --amber: #ffb340;
+  --text: #cdd9e5;
+  --muted: #4d6278;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans Arabic', sans-serif;
+  --r: 10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+body::after {
+  content: '';
+  position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 40% at 20% 10%, rgba(61,240,176,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 30% at 80% 90%, rgba(79,163,255,0.05) 0%, transparent 60%);
+}
+#app { position: relative; z-index: 1; max-width: 500px; margin: 0 auto; padding: 0 14px 60px; }
+
+/* ── Header ── */
+header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 0 14px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+.logo-wrap { display: flex; flex-direction: column; gap: 2px; }
+.logo-ar { font-size: 20px; font-weight: 700; color: var(--accent); letter-spacing: -0.5px; }
+.logo-en { font-family: var(--mono); font-size: 9px; color: var(--muted); letter-spacing: 3px; text-transform: uppercase; }
+.hdr-right { display: flex; gap: 8px; align-items: center; }
+.pill-btn {
+  background: var(--s1); border: 1px solid var(--border); color: var(--muted);
+  padding: 6px 12px; border-radius: 20px; font-family: var(--mono); font-size: 10px;
+  cursor: pointer; letter-spacing: 1px; transition: all .18s;
+}
+.pill-btn:hover, .pill-btn.active { border-color: var(--accent); color: var(--accent); }
+
+/* ── Tabs ── */
+.tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 20px; }
+.tab {
+  background: var(--s1); border: 1px solid var(--border); color: var(--muted);
+  padding: 9px 4px; border-radius: var(--r); font-size: 11px; font-family: var(--sans);
+  cursor: pointer; text-align: center; line-height: 1.3; transition: all .18s;
+}
+.tab.active { background: var(--s2); border-color: var(--accent); color: var(--accent); }
+.section { display: none; }
+.section.active { display: block; }
+
+/* ── Cards ── */
+.card { background: var(--s1); border: 1px solid var(--border); border-radius: 12px; padding: 18px; margin-bottom: 14px; }
+.card-title {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 2px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* ── Form ── */
+label { display: block; font-size: 11px; font-family: var(--mono); color: var(--muted); margin-bottom: 5px; letter-spacing: .5px; }
+input[type=text], input[type=number], select, textarea {
+  width: 100%; background: var(--s2); border: 1px solid var(--border); color: var(--text);
+  padding: 10px 12px; border-radius: 8px; font-family: var(--sans); font-size: 14px;
+  margin-bottom: 12px; transition: border-color .18s; -webkit-appearance: none; appearance: none;
+}
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); }
+input[type=number] { font-family: var(--mono); }
+
+/* ── Buttons ── */
+.btn {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 13px; border-radius: var(--r);
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  cursor: pointer; transition: all .18s; border: none; margin-bottom: 10px;
+}
+.btn-primary { background: var(--accent); color: #000; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-primary:disabled { opacity: .35; cursor: not-allowed; }
+.btn-outline { background: transparent; border: 1px solid var(--border); color: var(--muted); }
+.btn-outline:hover { border-color: var(--blue); color: var(--blue); }
+.btn-danger { background: transparent; border: 1px solid var(--warn); color: var(--warn); }
+.btn-amber { background: transparent; border: 1px solid var(--amber); color: var(--amber); }
+
+/* ── Answer Key Grid ── */
+.key-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 12px; }
+.key-item { display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.q-num { font-family: var(--mono); font-size: 9px; color: var(--muted); }
+.key-sel {
+  width: 100%; background: var(--s2); border: 1px solid var(--border); color: var(--text);
+  padding: 6px 2px; border-radius: 6px; font-family: var(--mono); font-size: 13px;
+  text-align: center; cursor: pointer; -webkit-appearance: none; appearance: none; margin-bottom: 0;
+}
+.key-sel:focus { outline: none; border-color: var(--accent); }
+.key-sel.set { border-color: rgba(61,240,176,.5); color: var(--accent); }
+
+/* ── Camera / Upload ── */
+#cam-box {
+  position: relative; width: 100%; background: #000;
+  border-radius: 12px; overflow: hidden; margin-bottom: 12px;
+  aspect-ratio: 3/4; display: flex; align-items: center; justify-content: center;
+  border: 1px solid var(--border);
+}
+#video { width: 100%; height: 100%; object-fit: cover; display: none; }
+.cam-ph { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: var(--muted); font-size: 13px; text-align: center; padding: 20px; }
+.cam-ph-icon { font-size: 52px; opacity: .25; }
+.corner { position: absolute; width: 52px; height: 52px; border-color: var(--accent); border-style: solid; opacity: .7; display: none; }
+.tl { top:12px; left:12px; border-width: 3px 0 0 3px; }
+.tr { top:12px; right:12px; border-width: 3px 3px 0 0; }
+.bl { bottom:12px; left:12px; border-width: 0 0 3px 3px; }
+.br { bottom:12px; right:12px; border-width: 0 3px 3px 0; }
+#canvas-hidden { display: none; }
+#preview { width: 100%; border-radius: 12px; display: none; margin-bottom: 12px; border: 1px solid var(--border); }
+
+.upload-zone {
+  border: 2px dashed var(--border); border-radius: var(--r); padding: 22px;
+  text-align: center; color: var(--muted); font-size: 13px; cursor: pointer;
+  transition: border-color .18s; margin-bottom: 12px; position: relative;
+}
+.upload-zone:hover { border-color: var(--accent); color: var(--accent); }
+.upload-zone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.upload-icon { font-size: 30px; margin-bottom: 6px; }
+
+/* ── Debug overlay ── */
+#debug-canvas {
+  width: 100%; border-radius: 12px; display: none;
+  margin-bottom: 12px; border: 2px solid var(--amber);
+}
+.debug-toggle { font-size: 11px; color: var(--muted); cursor: pointer; font-family: var(--mono); }
+.debug-toggle:hover { color: var(--amber); }
+
+/* ── Processing ── */
+.processing-overlay {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 24px; text-align: center; margin-bottom: 12px; display: none;
+}
+.spinner { width: 32px; height: 32px; border: 3px solid rgba(61,240,176,.15); border-top-color: var(--accent); border-radius: 50%; animation: spin .7s linear infinite; margin: 0 auto 12px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.proc-steps { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+.proc-step { padding: 3px 0; transition: color .3s; }
+.proc-step.done { color: var(--accent); }
+.proc-step.active { color: var(--text); }
+
+/* ── Results ── */
+.result-card {
+  background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+  padding: 16px; margin-bottom: 10px;
+}
+.result-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+.r-name { font-size: 15px; font-weight: 600; }
+.r-meta { font-size: 10px; color: var(--muted); font-family: var(--mono); margin-top: 3px; }
+.score-badge { font-family: var(--mono); font-size: 20px; font-weight: 600; padding: 4px 11px; border-radius: 6px; }
+.s-high { background: rgba(61,240,176,.12); color: var(--accent); }
+.s-mid { background: rgba(255,179,64,.12); color: var(--amber); }
+.s-low { background: rgba(255,95,95,.12); color: var(--warn); }
+.ans-row { display: flex; flex-wrap: wrap; gap: 5px; }
+.ab {
+  font-family: var(--mono); font-size: 10px; padding: 2px 6px;
+  border-radius: 4px; border: 1px solid;
+}
+.ab-ok { background: rgba(61,240,176,.08); color: var(--accent); border-color: rgba(61,240,176,.25); }
+.ab-ng { background: rgba(255,95,95,.08); color: var(--warn); border-color: rgba(255,95,95,.25); }
+.ab-mt { background: rgba(255,179,64,.08); color: var(--amber); border-color: rgba(255,179,64,.25); }
+.ab-em { background: rgba(77,98,120,.08); color: var(--muted); border-color: var(--border); }
+
+.stats-row {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px;
+  background: var(--s2); border: 1px solid var(--border); border-radius: var(--r); padding: 14px;
+}
+.stat-v { font-family: var(--mono); font-size: 24px; font-weight: 600; color: var(--accent); }
+.stat-l { font-size: 10px; color: var(--muted); margin-top: 2px; letter-spacing: .5px; }
+
+/* ── Layout Editor ── */
+.layout-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+.layout-item {
+  background: var(--s2); border: 1px solid var(--border); border-radius: 8px;
+  padding: 12px 14px; display: flex; justify-content: space-between; align-items: center;
+  cursor: pointer; transition: border-color .18s;
+}
+.layout-item:hover { border-color: var(--blue); }
+.layout-item.selected { border-color: var(--accent); }
+.layout-name { font-size: 14px; font-weight: 600; }
+.layout-sub { font-size: 11px; color: var(--muted); font-family: var(--mono); margin-top: 2px; }
+.layout-check { color: var(--accent); font-size: 18px; opacity: 0; transition: opacity .18s; }
+.layout-item.selected .layout-check { opacity: 1; }
+.del-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 16px; padding: 4px; transition: color .2s; }
+.del-btn:hover { color: var(--warn); }
+
+/* ── Inline confidence bars ── */
+.conf-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.conf-fill { height: 100%; border-radius: 2px; transition: width .4s ease; }
+
+/* ── Toast ── */
+#toast {
+  position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(80px);
+  background: var(--s2); border: 1px solid var(--accent); color: var(--text);
+  padding: 11px 20px; border-radius: 10px; font-size: 13px; z-index: 999;
+  transition: transform .28s; white-space: nowrap; max-width: 90vw; text-align: center;
+}
+#toast.show { transform: translateX(-50%) translateY(0); }
+#toast.err { border-color: var(--warn); }
+
+/* ── Misc ── */
+.empty-state { text-align: center; padding: 40px 20px; color: var(--muted); font-size: 13px; line-height: 1.8; }
+.empty-icon { font-size: 44px; margin-bottom: 12px; opacity: .2; }
+.row { display: flex; gap: 8px; }
+.row input, .row select { margin-bottom: 0; flex: 1; }
+.row .btn { margin-bottom: 0; padding: 10px; flex-shrink: 0; width: auto; }
+hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+.badge { font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 20px; background: rgba(61,240,176,.1); color: var(--accent); border: 1px solid rgba(61,240,176,.25); }
+
+/* ── Notice box ── */
+.notice { background: rgba(79,163,255,.07); border: 1px solid rgba(79,163,255,.2); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #7ab8ff; margin-bottom: 14px; line-height: 1.7; }
+
+@media (max-width: 360px) { .key-grid { grid-template-columns: repeat(4,1fr); } .tabs { grid-template-columns: repeat(2,1fr); } }
+</style>
+</head>
+<body>
+<div id="app">
+
+<header>
+  <div class="logo-wrap">
+    <div class="logo-ar">مُصحِّح</div>
+    <div class="logo-en">BubbleScan · Open Source</div>
+  </div>
+  <div class="hdr-right">
+    <button class="pill-btn" onclick="toggleLang()" id="lang-btn">EN</button>
+  </div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" onclick="nav('setup')" id="tab-setup"><span class="ar">الإعداد</span><span class="en" style="display:none">Setup</span></button>
+  <button class="tab" onclick="nav('scan')" id="tab-scan"><span class="ar">المسح</span><span class="en" style="display:none">Scan</span></button>
+  <button class="tab" onclick="nav('results')" id="tab-results"><span class="ar">النتائج</span><span class="en" style="display:none">Results</span></button>
+  <button class="tab" onclick="nav('layouts')" id="tab-layouts"><span class="ar">القوالب</span><span class="en" style="display:none">Layouts</span></button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SETUP
+═══════════════════════════════════════════════ -->
+<div class="section active" id="section-setup">
+
+  <div class="card">
+    <div class="card-title">
+      <span><span class="ar">الاختبار</span><span class="en" style="display:none">Exam</span></span>
+      <span class="badge" id="layout-badge">ZipGrade 20</span>
+    </div>
+    <label><span class="ar">اسم المقرر</span><span class="en" style="display:none">Course Name</span></label>
+    <input type="text" id="exam-name" placeholder="…" />
+    <label><span class="ar">القالب المستخدم</span><span class="en" style="display:none">Sheet Layout</span></label>
+    <select id="layout-select" onchange="onLayoutChange()"></select>
+  </div>
+
+  <div class="card">
+    <div class="card-title">
+      <span><span class="ar">مفتاح الإجابات</span><span class="en" style="display:none">Answer Key</span></span>
+      <span class="debug-toggle" onclick="toggleDebugMode()">⚙ debug</span>
+    </div>
+    <div id="key-grid" class="key-grid"></div>
+    <button class="btn btn-outline" onclick="clearKey()" style="margin-top:4px">
+      <span class="ar">مسح المفتاح</span><span class="en" style="display:none">Clear Key</span>
+    </button>
+  </div>
+
+  <button class="btn btn-primary" onclick="nav('scan')">
+    <span class="ar">▶ ابدأ المسح</span><span class="en" style="display:none">▶ Start Scanning</span>
+  </button>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     SCAN
+═══════════════════════════════════════════════ -->
+<div class="section" id="section-scan">
+
+  <div class="card">
+    <div class="card-title"><span class="ar">بيانات الطالب</span><span class="en" style="display:none">Student</span></div>
+    <label><span class="ar">اسم الطالب / الرقم</span><span class="en" style="display:none">Student Name / ID</span></label>
+    <input type="text" id="student-name" placeholder="…" />
+  </div>
+
+  <!-- Camera box -->
+  <div id="cam-box">
+    <div class="cam-ph" id="cam-ph">
+      <div class="cam-ph-icon">📄</div>
+      <div class="ar">وجّه الكاميرا نحو ورقة الإجابات</div>
+      <div class="en" style="display:none">Point camera at the answer sheet</div>
+    </div>
+    <video id="video" playsinline autoplay muted></video>
+    <div class="corner tl" id="c-tl"></div>
+    <div class="corner tr" id="c-tr"></div>
+    <div class="corner bl" id="c-bl"></div>
+    <div class="corner br" id="c-br"></div>
+  </div>
+
+  <canvas id="canvas-hidden"></canvas>
+  <canvas id="debug-canvas"></canvas>
+  <img id="preview" alt="captured sheet" />
+
+  <!-- Actions -->
+  <div id="scan-actions">
+    <button class="btn btn-primary" id="btn-open-cam" onclick="openCamera()">
+      📷 <span class="ar">تشغيل الكاميرا</span><span class="en" style="display:none">Open Camera</span>
+    </button>
+    <div class="upload-zone">
+      <div class="upload-icon">🖼️</div>
+      <div class="ar">أو ارفع صورة من الجهاز</div>
+      <div class="en" style="display:none">Or upload image from device</div>
+      <input type="file" accept="image/*" onchange="handleUpload(event)" />
+    </div>
+    <button class="btn btn-primary" id="btn-capture" onclick="captureFrame()" style="display:none">
+      ⊙ <span class="ar">التقاط</span><span class="en" style="display:none">Capture</span>
+    </button>
+    <button class="btn btn-primary" id="btn-grade" onclick="gradeImage()" style="display:none">
+      ✦ <span class="ar">تصحيح الآن</span><span class="en" style="display:none">Grade Now</span>
+    </button>
+    <button class="btn btn-outline" id="btn-retake" onclick="retake()" style="display:none">
+      ↺ <span class="ar">إعادة</span><span class="en" style="display:none">Retake</span>
+    </button>
+  </div>
+
+  <!-- Processing -->
+  <div class="processing-overlay" id="proc-overlay">
+    <div class="spinner"></div>
+    <div class="proc-steps">
+      <div class="proc-step" id="step1">① <span class="ar">تحليل الصورة</span><span class="en" style="display:none">Analyzing image</span></div>
+      <div class="proc-step" id="step2">② <span class="ar">تحديد الإطار</span><span class="en" style="display:none">Locating sheet corners</span></div>
+      <div class="proc-step" id="step3">③ <span class="ar">قراءة الفقاعات</span><span class="en" style="display:none">Reading bubbles</span></div>
+      <div class="proc-step" id="step4">④ <span class="ar">مقارنة المفتاح</span><span class="en" style="display:none">Comparing answer key</span></div>
+    </div>
+  </div>
+
+  <!-- Threshold calibration (shown after grade) -->
+  <div class="card" id="threshold-card" style="display:none">
+    <div class="card-title">
+      <span class="ar">ضبط حساسية الاكتشاف</span><span class="en" style="display:none">Detection Sensitivity</span>
+      <span class="badge" id="thresh-val">120</span>
+    </div>
+    <input type="range" min="40" max="220" value="120" id="thresh-slider"
+      style="width:100%;accent-color:var(--accent);margin-bottom:10px;" oninput="regrade()">
+    <div style="font-size:11px; color:var(--muted); font-family:var(--mono);">
+      <span class="ar">↓ أقل = يكتشف أي خط فاتح &nbsp;|&nbsp; ↑ أكثر = يكتشف الفقاعات المعبأة بشدة فقط</span>
+      <span class="en" style="display:none">↓ lower = detect faint marks | ↑ higher = detect only heavy fills</span>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     RESULTS
+═══════════════════════════════════════════════ -->
+<div class="section" id="section-results">
+  <div class="empty-state" id="res-empty">
+    <div class="empty-icon">📋</div>
+    <div class="ar">لا توجد نتائج بعد<br>ابدأ بمسح ورقة إجابات</div>
+    <div class="en" style="display:none">No results yet<br>Start by scanning an answer sheet</div>
+  </div>
+  <div id="res-content" style="display:none">
+    <div class="stats-row" id="stats-row"></div>
+    <div id="results-list"></div>
+    <button class="btn btn-danger" onclick="clearResults()">
+      🗑 <span class="ar">مسح النتائج</span><span class="en" style="display:none">Clear Results</span>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     LAYOUTS
+═══════════════════════════════════════════════ -->
+<div class="section" id="section-layouts">
+  <div class="notice">
+    <span class="ar">القوالب تحدد مواضع الفقاعات على ورقة الإجابات. المعلمات تُحفظ محلياً.</span>
+    <span class="en" style="display:none">Layouts define bubble positions on the answer sheet. All data is stored locally.</span>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><span class="ar">القوالب المحفوظة</span><span class="en" style="display:none">Saved Layouts</span></div>
+    <div id="layout-list" class="layout-list"></div>
+    <button class="btn btn-outline" onclick="showNewLayoutForm()">
+      + <span class="ar">قالب جديد</span><span class="en" style="display:none">New Layout</span>
+    </button>
+  </div>
+
+  <!-- New layout form -->
+  <div class="card" id="new-layout-form" style="display:none">
+    <div class="card-title"><span class="ar">إعداد قالب جديد</span><span class="en" style="display:none">New Layout Config</span></div>
+
+    <label><span class="ar">اسم القالب</span><span class="en" style="display:none">Layout Name</span></label>
+    <input type="text" id="nl-name" placeholder="e.g. Custom 30Q" />
+
+    <label><span class="ar">عدد الأسئلة</span><span class="en" style="display:none">Number of Questions</span></label>
+    <input type="number" id="nl-questions" value="20" min="5" max="100" />
+
+    <label><span class="ar">عدد الخيارات لكل سؤال</span><span class="en" style="display:none">Choices per Question</span></label>
+    <select id="nl-choices">
+      <option value="4">4 (A B C D)</option>
+      <option value="5" selected>5 (A B C D E)</option>
+    </select>
+
+    <label><span class="ar">عدد الأعمدة على الورقة</span><span class="en" style="display:none">Columns on Sheet</span></label>
+    <select id="nl-cols">
+      <option value="1">عمود واحد / 1 column</option>
+      <option value="2" selected>عمودان / 2 columns</option>
+    </select>
+
+    <hr>
+    <div style="font-size:12px; color:var(--muted); margin-bottom:12px; font-family:var(--mono);">
+      <span class="ar">مناطق الفقاعات (نسب مئوية من أبعاد الورقة)</span>
+      <span class="en" style="display:none">Bubble regions (% of sheet dimensions)</span>
+    </div>
+
+    <div class="row">
+      <div style="flex:1">
+        <label>Top %</label>
+        <input type="number" id="nl-top" value="18" min="0" max="90" style="margin-bottom:0" />
+      </div>
+      <div style="flex:1">
+        <label>Bottom %</label>
+        <input type="number" id="nl-bot" value="87" min="10" max="100" style="margin-bottom:0"/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div style="flex:1">
+        <label><span class="ar">يسار العمود 1 %</span><span class="en" style="display:none">Col1 Left %</span></label>
+        <input type="number" id="nl-c1l" value="18" min="0" max="90" style="margin-bottom:0"/>
+      </div>
+      <div style="flex:1">
+        <label><span class="ar">يمين العمود 1 %</span><span class="en" style="display:none">Col1 Right %</span></label>
+        <input type="number" id="nl-c1r" value="52" min="10" max="100" style="margin-bottom:0"/>
+      </div>
+    </div>
+    <div class="row" style="margin-top:8px; margin-bottom:14px">
+      <div style="flex:1">
+        <label><span class="ar">يسار العمود 2 %</span><span class="en" style="display:none">Col2 Left %</span></label>
+        <input type="number" id="nl-c2l" value="52" min="0" max="90" style="margin-bottom:0"/>
+      </div>
+      <div style="flex:1">
+        <label><span class="ar">يمين العمود 2 %</span><span class="en" style="display:none">Col2 Right %</span></label>
+        <input type="number" id="nl-c2r" value="88" min="10" max="100" style="margin-bottom:0"/>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-primary" onclick="saveNewLayout()" style="margin:0;flex:1">
+        <span class="ar">حفظ القالب</span><span class="en" style="display:none">Save Layout</span>
+      </button>
+      <button class="btn btn-outline" onclick="cancelNewLayout()" style="margin:0;flex:0 0 80px">
+        <span class="ar">إلغاء</span><span class="en" style="display:none">Cancel</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /#app -->
+<div id="toast"></div>
+
+<script>
+// ══════════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════════
+let lang = 'ar';
+let debugMode = false;
+let cameraStream = null;
+let capturedDataURL = null;   // the photo taken/uploaded
+let lastPixelData = null;     // ImageData from the photo
+let lastLayout = null;        // layout used for last grade
+let lastGradeResult = null;   // {answers, rawScores} from last grade
+let results = JSON.parse(localStorage.getItem('bs_results') || '[]');
+let answerKey = JSON.parse(localStorage.getItem('bs_key') || '{}');
+let activeLayoutId = localStorage.getItem('bs_active_layout') || 'zipgrade20';
+
+// ══════════════════════════════════════════════
+// BUILT-IN LAYOUTS
+// Bubble grid defined as % of warped sheet dimensions
+// layout: { id, name, numQ, choices, cols, top, bot, col1:[l,r], col2:[l,r] }
+// ══════════════════════════════════════════════
+const BUILTIN_LAYOUTS = [
+  {
+    id: 'zipgrade20',
+    name: 'ZipGrade 20Q',
+    builtin: true,
+    numQ: 20,
+    choices: 5,   // A B C D E
+    cols: 2,
+    top: 19,  bot: 88,
+    col1: [16, 51],
+    col2: [52, 88]
+  }
+];
+
+function getLayouts() {
+  const custom = JSON.parse(localStorage.getItem('bs_layouts') || '[]');
+  return [...BUILTIN_LAYOUTS, ...custom];
+}
+
+function getLayout(id) {
+  return getLayouts().find(l => l.id === id) || BUILTIN_LAYOUTS[0];
+}
+
+// ══════════════════════════════════════════════
+// LANG
+// ══════════════════════════════════════════════
+function toggleLang() {
+  lang = lang === 'ar' ? 'en' : 'ar';
+  document.documentElement.lang = lang;
+  document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  document.querySelectorAll('.ar').forEach(e => e.style.display = lang === 'ar' ? '' : 'none');
+  document.querySelectorAll('.en').forEach(e => e.style.display = lang === 'en' ? '' : 'none');
+  document.getElementById('lang-btn').textContent = lang === 'ar' ? 'EN' : 'ع';
+}
+
+// ══════════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════════
+function nav(name) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('section-' + name).classList.add('active');
+  document.getElementById('tab-' + name).classList.add('active');
+  if (name === 'results') renderResults();
+  if (name === 'layouts') renderLayoutList();
+  if (name !== 'scan') stopCamera();
+}
+
+// ══════════════════════════════════════════════
+// LAYOUT SELECTOR (setup tab)
+// ══════════════════════════════════════════════
+function populateLayoutSelect() {
+  const sel = document.getElementById('layout-select');
+  sel.innerHTML = '';
+  getLayouts().forEach(l => {
+    const o = document.createElement('option');
+    o.value = l.id;
+    o.textContent = l.name + ` (${l.numQ}Q, ${l.choices} choices)`;
+    if (l.id === activeLayoutId) o.selected = true;
+    sel.appendChild(o);
+  });
+}
+
+function onLayoutChange() {
+  activeLayoutId = document.getElementById('layout-select').value;
+  localStorage.setItem('bs_active_layout', activeLayoutId);
+  const lay = getLayout(activeLayoutId);
+  document.getElementById('layout-badge').textContent = lay.name;
+  answerKey = {};
+  localStorage.removeItem('bs_key');
+  buildKeyGrid(lay.numQ, lay.choices);
+}
+
+// ══════════════════════════════════════════════
+// ANSWER KEY
+// ══════════════════════════════════════════════
+function buildKeyGrid(numQ, choices) {
+  const grid = document.getElementById('key-grid');
+  grid.innerHTML = '';
+  const opts = ['A','B','C','D','E'].slice(0, choices);
+  for (let i = 1; i <= numQ; i++) {
+    const wrap = document.createElement('div');
+    wrap.className = 'key-item';
+    const num = document.createElement('div');
+    num.className = 'q-num';
+    num.textContent = i;
+    const sel = document.createElement('select');
+    sel.className = 'key-sel';
+    sel.id = 'k' + i;
+    const empty = document.createElement('option');
+    empty.value = ''; empty.textContent = '?';
+    sel.appendChild(empty);
+    opts.forEach(o => {
+      const op = document.createElement('option');
+      op.value = o; op.textContent = o;
+      sel.appendChild(op);
+    });
+    if (answerKey[i]) { sel.value = answerKey[i]; sel.classList.add('set'); }
+    sel.addEventListener('change', function() {
+      if (this.value) this.classList.add('set'); else this.classList.remove('set');
+      saveKey(numQ);
+    });
+    wrap.appendChild(num); wrap.appendChild(sel);
+    grid.appendChild(wrap);
+  }
+}
+
+function saveKey(numQ) {
+  const key = {};
+  for (let i = 1; i <= numQ; i++) {
+    const s = document.getElementById('k' + i);
+    if (s && s.value) key[i] = s.value;
+  }
+  answerKey = key;
+  localStorage.setItem('bs_key', JSON.stringify(key));
+}
+
+function clearKey() {
+  answerKey = {};
+  localStorage.removeItem('bs_key');
+  const lay = getLayout(activeLayoutId);
+  buildKeyGrid(lay.numQ, lay.choices);
+}
+
+// ══════════════════════════════════════════════
+// CAMERA
+// ══════════════════════════════════════════════
+async function openCamera() {
+  try {
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width: { ideal: 2048 }, height: { ideal: 1536 } }
+    });
+    const vid = document.getElementById('video');
+    vid.srcObject = cameraStream;
+    vid.style.display = '';
+    document.getElementById('cam-ph').style.display = 'none';
+    ['c-tl','c-tr','c-bl','c-br'].forEach(id => document.getElementById(id).style.display = '');
+    document.getElementById('btn-open-cam').style.display = 'none';
+    document.getElementById('btn-capture').style.display = '';
+  } catch(e) {
+    toast(lang === 'ar' ? 'تعذر الوصول للكاميرا — جرب رفع صورة' : 'Camera unavailable — try uploading', true);
+  }
+}
+
+function captureFrame() {
+  const vid = document.getElementById('video');
+  const canvas = document.getElementById('canvas-hidden');
+  canvas.width = vid.videoWidth; canvas.height = vid.videoHeight;
+  canvas.getContext('2d').drawImage(vid, 0, 0);
+  capturedDataURL = canvas.toDataURL('image/jpeg', 0.95);
+  stopCamera();
+  showPreview(capturedDataURL);
+}
+
+function handleUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => { capturedDataURL = ev.target.result; showPreview(capturedDataURL); };
+  reader.readAsDataURL(file);
+}
+
+function showPreview(dataURL) {
+  const img = document.getElementById('preview');
+  img.src = dataURL; img.style.display = '';
+  document.getElementById('cam-box').style.display = 'none';
+  document.getElementById('btn-capture').style.display = 'none';
+  document.getElementById('btn-open-cam').style.display = 'none';
+  document.getElementById('btn-grade').style.display = '';
+  document.getElementById('btn-retake').style.display = '';
+  document.getElementById('threshold-card').style.display = 'none';
+  document.getElementById('debug-canvas').style.display = 'none';
+}
+
+function retake() {
+  capturedDataURL = null; lastPixelData = null;
+  document.getElementById('preview').style.display = 'none';
+  document.getElementById('debug-canvas').style.display = 'none';
+  document.getElementById('threshold-card').style.display = 'none';
+  document.getElementById('cam-box').style.display = '';
+  document.getElementById('cam-ph').style.display = '';
+  document.getElementById('btn-open-cam').style.display = '';
+  document.getElementById('btn-grade').style.display = 'none';
+  document.getElementById('btn-retake').style.display = 'none';
+}
+
+function stopCamera() {
+  if (cameraStream) { cameraStream.getTracks().forEach(t => t.stop()); cameraStream = null; }
+  const vid = document.getElementById('video');
+  vid.style.display = 'none'; vid.srcObject = null;
+  ['c-tl','c-tr','c-bl','c-br'].forEach(id => document.getElementById(id).style.display = 'none');
+}
+
+// ══════════════════════════════════════════════
+// DEBUG MODE
+// ══════════════════════════════════════════════
+function toggleDebugMode() {
+  debugMode = !debugMode;
+  toast(debugMode ? 'Debug ON — bubble map shown after scan' : 'Debug OFF', false);
+}
+
+// ══════════════════════════════════════════════
+// CORE: IMAGE → BUBBLE READS
+// Strategy:
+//  1. Load image onto hidden canvas
+//  2. Convert to grayscale
+//  3. Find the 4 corner alignment squares (large dark blobs)
+//  4. Perspective-correct (bilinear warp) to a canonical 600×800 space
+//  5. For each bubble region, sample average darkness
+//  6. Per row, the darkest bubble wins (if dark enough vs threshold)
+// ══════════════════════════════════════════════
+
+function loadImageToCanvas(dataURL) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const c = document.getElementById('canvas-hidden');
+      c.width = img.naturalWidth; c.height = img.naturalHeight;
+      const ctx = c.getContext('2d');
+      ctx.drawImage(img, 0, 0);
+      resolve(ctx.getImageData(0, 0, c.width, c.height));
+    };
+    img.onerror = reject;
+    img.src = dataURL;
+  });
+}
+
+// Returns average grayscale [0..255] of a rectangular region in ImageData
+function sampleRegionDark(data, W, x0, y0, x1, y1) {
+  x0 = Math.max(0, Math.round(x0)); y0 = Math.max(0, Math.round(y0));
+  x1 = Math.min(W - 1, Math.round(x1)); y1 = Math.min(Math.floor(data.data.length / W / 4) - 1, Math.round(y1));
+  if (x1 <= x0 || y1 <= y0) return 255;
+  let sum = 0, count = 0;
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) {
+      const idx = (y * W + x) * 4;
+      const gray = 0.299 * data.data[idx] + 0.587 * data.data[idx+1] + 0.114 * data.data[idx+2];
+      sum += gray; count++;
+    }
+  }
+  return count ? sum / count : 255;
+}
+
+// Find bounding box of all dark pixels in a region — used to locate alignment squares
+function findDarkBlobs(data, W, H, darkThresh = 80) {
+  // Scan for connected dark blobs using flood-fill seeds on a grid
+  const blobs = [];
+  const visited = new Uint8Array(W * H);
+  for (let y = 0; y < H; y += 4) {
+    for (let x = 0; x < W; x += 4) {
+      const idx = (y * W + x) * 4;
+      const g = 0.299*data.data[idx] + 0.587*data.data[idx+1] + 0.114*data.data[idx+2];
+      if (g < darkThresh && !visited[y*W+x]) {
+        // BFS
+        const q = [[x, y]];
+        let minX=x, maxX=x, minY=y, maxY=y;
+        let count = 0;
+        while (q.length) {
+          const [cx, cy] = q.pop();
+          if (cx < 0 || cy < 0 || cx >= W || cy >= H) continue;
+          if (visited[cy*W+cx]) continue;
+          const cidx = (cy*W+cx)*4;
+          const cg = 0.299*data.data[cidx]+0.587*data.data[cidx+1]+0.114*data.data[cidx+2];
+          if (cg >= darkThresh) continue;
+          visited[cy*W+cx] = 1;
+          count++;
+          minX = Math.min(minX, cx); maxX = Math.max(maxX, cx);
+          minY = Math.min(minY, cy); maxY = Math.max(maxY, cy);
+          q.push([cx+2,cy],[cx-2,cy],[cx,cy+2],[cx,cy-2]);
+        }
+        if (count > 30) blobs.push({ minX, maxX, minY, maxY, count, cx:(minX+maxX)/2, cy:(minY+maxY)/2 });
+      }
+    }
+  }
+  return blobs;
+}
+
+// Find 4 corner squares: largest roughly-square dark blobs near corners
+function findCorners(blobs, W, H) {
+  // Filter: must be roughly square and large enough
+  const candidates = blobs.filter(b => {
+    const w = b.maxX - b.minX, h = b.maxY - b.minY;
+    const ratio = w / (h || 1);
+    return w > W*0.02 && h > H*0.02 && ratio > 0.4 && ratio < 2.5;
+  });
+  if (candidates.length < 4) return null;
+
+  // Assign to quadrants
+  const midX = W / 2, midY = H / 2;
+  const quad = { tl: null, tr: null, bl: null, br: null };
+  for (const b of candidates) {
+    const q = b.cy < midY ? (b.cx < midX ? 'tl' : 'tr') : (b.cx < midX ? 'bl' : 'br');
+    if (!quad[q] || b.count > quad[q].count) quad[q] = b;
+  }
+  if (!quad.tl || !quad.tr || !quad.bl || !quad.br) return null;
+  return quad;
+}
+
+// Bilinear interpolation sample from ImageData
+function bilinearSample(data, W, H, fx, fy) {
+  const x0 = Math.floor(fx), y0 = Math.floor(fy);
+  const x1 = Math.min(x0+1, W-1), y1 = Math.min(y0+1, H-1);
+  const dx = fx - x0, dy = fy - y0;
+  const idx = (r, c) => (r*W+c)*4;
+  const lerp = (a, b, t) => a + (b-a)*t;
+  const r = lerp(lerp(data.data[idx(y0,x0)],data.data[idx(y0,x1)],dx), lerp(data.data[idx(y1,x0)],data.data[idx(y1,x1)],dx), dy);
+  const g = lerp(lerp(data.data[idx(y0,x0)+1],data.data[idx(y0,x1)+1],dx), lerp(data.data[idx(y1,x0)+1],data.data[idx(y1,x1)+1],dx), dy);
+  const b = lerp(lerp(data.data[idx(y0,x0)+2],data.data[idx(y0,x1)+2],dx), lerp(data.data[idx(y1,x0)+2],data.data[idx(y1,x1)+2],dx), dy);
+  return 0.299*r + 0.587*g + 0.114*b;
+}
+
+// Perspective warp: map (0..1, 0..1) normalized coords on the warped sheet
+// to pixel coords in the original image using bilinear corner interpolation
+function warpSample(data, W, H, corners, normX, normY) {
+  // Bilinear interpolation of 4 corner points
+  const {tl, tr, bl, br} = corners;
+  const tx = normX, ty = normY;
+  const fx = (1-tx)*(1-ty)*tl.cx + tx*(1-ty)*tr.cx + (1-tx)*ty*bl.cx + tx*ty*br.cx;
+  const fy = (1-tx)*(1-ty)*tl.cy + tx*(1-ty)*tr.cy + (1-tx)*ty*bl.cy + tx*ty*br.cy;
+  return bilinearSample(data, W, H, fx, fy);
+}
+
+// ══════════════════════════════════════════════
+// MAIN GRADING FUNCTION
+// ══════════════════════════════════════════════
+async function gradeImage() {
+  if (!capturedDataURL) { toast(lang==='ar'?'التقط صورة أولاً':'Capture image first', true); return; }
+  const layout = getLayout(activeLayoutId);
+  lastLayout = layout;
+
+  document.getElementById('proc-overlay').style.display = '';
+  document.getElementById('btn-grade').disabled = true;
+  document.getElementById('btn-retake').disabled = true;
+
+  const steps = ['step1','step2','step3','step4'];
+  function setStep(i) { steps.forEach((s,j) => { const el = document.getElementById(s); el.className = 'proc-step' + (j < i ? ' done' : j === i ? ' active' : ''); }); }
+
+  await new Promise(r => setTimeout(r, 20));
+
+  try {
+    setStep(0);
+    const imageData = await loadImageToCanvas(capturedDataURL);
+    lastPixelData = imageData;
+    const W = imageData.width, H = imageData.height;
+    await tick();
+
+    setStep(1);
+    // Find corner alignment marks
+    const blobs = findDarkBlobs(imageData, W, H, 85);
+    const corners = findCorners(blobs, W, H);
+    await tick();
+
+    setStep(2);
+    const threshold = parseInt(document.getElementById('thresh-slider').value);
+    const answers = readBubbles(imageData, W, H, corners, layout, threshold);
+    lastGradeResult = answers;
+    await tick();
+
+    setStep(3);
+    const graded = computeGrade(answers.detectedAnswers, layout);
+    await tick();
+
+    // Store result
+    const studentName = document.getElementById('student-name').value.trim()
+      || (lang === 'ar' ? 'طالب' : 'Student');
+    const result = {
+      id: Date.now(),
+      name: studentName,
+      exam: document.getElementById('exam-name').value.trim() || (lang==='ar'?'اختبار':'Exam'),
+      date: new Date().toLocaleDateString(lang==='ar'?'ar-SA':'en-US'),
+      layout: layout.name,
+      numQ: layout.numQ,
+      ...graded,
+      detectedAnswers: answers.detectedAnswers,
+      rawScores: answers.rawScores,
+      cornersFound: !!corners
+    };
+
+    results.unshift(result);
+    localStorage.setItem('bs_results', JSON.stringify(results));
+
+    // Draw debug overlay
+    if (debugMode || !corners) {
+      drawDebugOverlay(imageData, W, H, corners, layout, answers.rawScores, threshold);
+    }
+
+    document.getElementById('threshold-card').style.display = '';
+    document.getElementById('thresh-val').textContent = threshold;
+
+    toast((lang==='ar'?'✓ تم التصحيح — ':'✓ Graded — ') + graded.pct + '%');
+    nav('results');
+
+  } catch(e) {
+    console.error(e);
+    toast((lang==='ar'?'خطأ: ':'Error: ') + e.message, true);
+  } finally {
+    document.getElementById('proc-overlay').style.display = 'none';
+    document.getElementById('btn-grade').disabled = false;
+    document.getElementById('btn-retake').disabled = false;
+  }
+}
+
+function tick() { return new Promise(r => setTimeout(r, 30)); }
+
+// ══════════════════════════════════════════════
+// READ BUBBLES
+// Returns { detectedAnswers: {1:'A',...}, rawScores: {1:[240,180,...],...} }
+// ══════════════════════════════════════════════
+function readBubbles(data, W, H, corners, layout, threshold) {
+  const { numQ, choices, cols, top, bot, col1, col2 } = layout;
+  const qPerCol = Math.ceil(numQ / cols);
+  const choiceLabels = ['A','B','C','D','E'].slice(0, choices);
+
+  const detectedAnswers = {};
+  const rawScores = {};
+
+  // If corners were found, use perspective correction; else fall back to raw %
+  const sample = corners
+    ? (nx, ny) => warpSample(data, W, H, corners, nx, ny)
+    : (nx, ny) => bilinearSample(data, W, H, nx*W, ny*H);
+
+  // Columns definitions in normalized [0..1] space
+  const colDefs = cols === 1
+    ? [[col1[0]/100, col1[1]/100]]
+    : [[col1[0]/100, col1[1]/100], [col2[0]/100, col2[1]/100]];
+
+  const topN = top / 100, botN = bot / 100;
+
+  for (let c = 0; c < colDefs.length; c++) {
+    const [cLeft, cRight] = colDefs[c];
+    const colW = cRight - cLeft;
+    const cellW = colW / choices;
+    const startQ = c * qPerCol + 1;
+    const endQ = Math.min(startQ + qPerCol - 1, numQ);
+    const rowCount = endQ - startQ + 1;
+
+    for (let qi = 0; qi < rowCount; qi++) {
+      const qNum = startQ + qi;
+      const rowTopN = topN + (botN - topN) * (qi / rowCount);
+      const rowBotN = topN + (botN - topN) * ((qi + 1) / rowCount);
+      const rowMidN = (rowTopN + rowBotN) / 2;
+      const cellH = (rowBotN - rowTopN) * 0.6; // sample inner 60% of row height
+
+      const scores = [];
+      for (let ch = 0; ch < choices; ch++) {
+        const cellLeft = cLeft + cellW * ch;
+        const cellRight = cellLeft + cellW;
+        // Sample a grid inside this bubble region
+        let sum = 0, cnt = 0;
+        const steps = 5;
+        for (let sy = 0; sy < steps; sy++) {
+          for (let sx = 0; sx < steps; sx++) {
+            const nx = cellLeft + cellW * (0.2 + 0.6 * sx/(steps-1));
+            const ny = rowMidN + cellH * (-0.5 + sy/(steps-1));
+            sum += sample(nx, ny);
+            cnt++;
+          }
+        }
+        scores.push(sum / cnt);
+      }
+
+      rawScores[qNum] = scores;
+      // Darkest = most filled; only mark if below threshold
+      const minScore = Math.min(...scores);
+      if (minScore < threshold) {
+        detectedAnswers[qNum] = choiceLabels[scores.indexOf(minScore)];
+      } else {
+        detectedAnswers[qNum] = null; // blank / no clear mark
+      }
+    }
+  }
+
+  return { detectedAnswers, rawScores };
+}
+
+// ══════════════════════════════════════════════
+// RE-GRADE (slider changed)
+// ══════════════════════════════════════════════
+function regrade() {
+  if (!lastPixelData || !lastLayout) return;
+  const threshold = parseInt(document.getElementById('thresh-slider').value);
+  document.getElementById('thresh-val').textContent = threshold;
+
+  const imageData = lastPixelData;
+  const W = imageData.width, H = imageData.height;
+  const blobs = findDarkBlobs(imageData, W, H, 85);
+  const corners = findCorners(blobs, W, H);
+  const answers = readBubbles(imageData, W, H, corners, lastLayout, threshold);
+  lastGradeResult = answers;
+
+  const graded = computeGrade(answers.detectedAnswers, lastLayout);
+
+  // Update the latest result in memory (don't push new)
+  if (results.length > 0) {
+    Object.assign(results[0], {
+      ...graded,
+      detectedAnswers: answers.detectedAnswers,
+      rawScores: answers.rawScores
+    });
+    localStorage.setItem('bs_results', JSON.stringify(results));
+  }
+
+  if (debugMode || !corners) {
+    drawDebugOverlay(imageData, W, H, corners, lastLayout, answers.rawScores, threshold);
+  }
+}
+
+// ══════════════════════════════════════════════
+// COMPUTE GRADE
+// ══════════════════════════════════════════════
+function computeGrade(detectedAnswers, layout) {
+  let correct = 0, wrong = 0, empty = 0, noKey = 0;
+  const detail = {};
+
+  for (let i = 1; i <= layout.numQ; i++) {
+    const given = detectedAnswers[i] || null;
+    const expected = answerKey[i] || null;
+    let status;
+    if (!given) { status = 'empty'; empty++; }
+    else if (!expected) { status = 'no-key'; noKey++; }
+    else if (given === expected) { status = 'correct'; correct++; }
+    else { status = 'wrong'; wrong++; }
+    detail[i] = { given, expected, status };
+  }
+
+  const scoreable = layout.numQ - noKey;
+  const pct = scoreable > 0 ? Math.round((correct / scoreable) * 100) : 0;
+  return { correct, wrong, empty, noKey, pct, detail };
+}
+
+// ══════════════════════════════════════════════
+// DEBUG OVERLAY
+// ══════════════════════════════════════════════
+function drawDebugOverlay(data, W, H, corners, layout, rawScores, threshold) {
+  const dc = document.getElementById('debug-canvas');
+  const scale = Math.min(500 / W, 800 / H);
+  dc.width = Math.round(W * scale);
+  dc.height = Math.round(H * scale);
+  dc.style.display = '';
+
+  const ctx = dc.getContext('2d');
+  // Draw original image scaled
+  const tmpCanvas = document.createElement('canvas');
+  tmpCanvas.width = W; tmpCanvas.height = H;
+  tmpCanvas.getContext('2d').putImageData(data, 0, 0);
+  ctx.drawImage(tmpCanvas, 0, 0, dc.width, dc.height);
+
+  // Draw corners
+  if (corners) {
+    ctx.strokeStyle = '#3df0b0'; ctx.lineWidth = 2;
+    Object.values(corners).forEach(c => {
+      ctx.strokeRect((c.minX)*scale, (c.minY)*scale, (c.maxX-c.minX)*scale, (c.maxY-c.minY)*scale);
+    });
+  }
+
+  // Draw bubble regions
+  const { numQ, choices, cols, top, bot, col1, col2 } = layout;
+  const qPerCol = Math.ceil(numQ / cols);
+  const colDefs = cols === 1 ? [[col1[0]/100, col1[1]/100]] : [[col1[0]/100, col1[1]/100], [col2[0]/100, col2[1]/100]];
+  const topN = top/100, botN = bot/100;
+
+  for (let c = 0; c < colDefs.length; c++) {
+    const [cLeft, cRight] = colDefs[c];
+    const colW = cRight - cLeft;
+    const cellW = colW / choices;
+    const startQ = c * qPerCol + 1;
+    const endQ = Math.min(startQ + qPerCol - 1, numQ);
+    const rowCount = endQ - startQ + 1;
+
+    for (let qi = 0; qi < rowCount; qi++) {
+      const qNum = startQ + qi;
+      const rowTopN = topN + (botN - topN) * (qi / rowCount);
+      const rowBotN = topN + (botN - topN) * ((qi + 1) / rowCount);
+
+      for (let ch = 0; ch < choices; ch++) {
+        const cellLeft = cLeft + cellW * ch;
+        const scores = rawScores[qNum] || [];
+        const score = scores[ch] ?? 255;
+        const isFilled = score < threshold;
+        const isMin = scores.length > 0 && score === Math.min(...scores) && isFilled;
+
+        const px = cellLeft * W * scale;
+        const py = rowTopN * H * scale;
+        const pw = cellW * W * scale * 0.7;
+        const ph = (rowBotN - rowTopN) * H * scale * 0.6;
+        const cx2 = px + cellW * W * scale * 0.5;
+        const cy2 = py + (rowBotN - rowTopN) * H * scale * 0.5;
+        const r = Math.min(pw, ph) / 2;
+
+        ctx.beginPath();
+        ctx.arc(cx2, cy2, r, 0, Math.PI*2);
+        ctx.strokeStyle = isMin ? '#3df0b0' : (isFilled ? '#ffb340' : 'rgba(200,200,200,0.3)');
+        ctx.lineWidth = isMin ? 2.5 : 1;
+        ctx.stroke();
+        if (isMin) { ctx.fillStyle = 'rgba(61,240,176,0.15)'; ctx.fill(); }
+      }
+    }
+  }
+}
+
+// ══════════════════════════════════════════════
+// RENDER RESULTS
+// ══════════════════════════════════════════════
+function renderResults() {
+  const empty = document.getElementById('res-empty');
+  const content = document.getElementById('res-content');
+  if (results.length === 0) { empty.style.display = ''; content.style.display = 'none'; return; }
+  empty.style.display = 'none'; content.style.display = '';
+
+  // Stats
+  const avg = Math.round(results.reduce((s,r)=>s+r.pct,0)/results.length);
+  const high = Math.max(...results.map(r=>r.pct));
+  document.getElementById('stats-row').innerHTML = `
+    <div><div class="stat-v">${results.length}</div><div class="stat-l">${lang==='ar'?'طالب':'Students'}</div></div>
+    <div><div class="stat-v">${avg}%</div><div class="stat-l">${lang==='ar'?'المتوسط':'Average'}</div></div>
+    <div><div class="stat-v">${high}%</div><div class="stat-l">${lang==='ar'?'الأعلى':'Highest'}</div></div>
+  `;
+
+  const list = document.getElementById('results-list');
+  list.innerHTML = '';
+  results.forEach((r, idx) => {
+    const sc = r.pct >= 75 ? 's-high' : r.pct >= 50 ? 's-mid' : 's-low';
+    let bubbles = '';
+    if (r.detail) {
+      for (let i = 1; i <= r.numQ; i++) {
+        const d = r.detail[i]; if (!d) continue;
+        let cls, txt;
+        if (d.status==='correct')  { cls='ab-ok'; txt=`${i}:${d.given}`; }
+        else if (d.status==='wrong') { cls='ab-ng'; txt=`${i}:${d.given||'?'}→${d.expected}`; }
+        else if (d.status==='empty') { cls='ab-em'; txt=`${i}:—`; }
+        else { cls='ab-mt'; txt=`${i}:${d.given||'?'}`; }
+        bubbles += `<div class="ab ${cls}">${txt}</div>`;
+      }
+    }
+    const cornerWarn = r.cornersFound === false ? `<span style="color:var(--amber);font-size:10px;font-family:var(--mono)">⚠ ${lang==='ar'?'لم يُعثر على إطار الورقة':'Sheet corners not found'}</span>` : '';
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.innerHTML = `
+      <div class="result-header">
+        <div>
+          <div class="r-name">${r.name}</div>
+          <div class="r-meta">${r.exam} · ${r.layout} · ${r.date}</div>
+          ${cornerWarn}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="score-badge ${sc}">${r.pct}%</div>
+          <button class="del-btn" onclick="deleteResult(${idx})">✕</button>
+        </div>
+      </div>
+      <div style="font-size:11px;color:var(--muted);font-family:var(--mono);margin-bottom:8px">✓${r.correct} ✗${r.wrong} —${r.empty}${r.noKey?' ◌'+r.noKey:''}</div>
+      <div class="ans-row">${bubbles}</div>
+    `;
+    list.appendChild(card);
+  });
+}
+
+function deleteResult(idx) {
+  results.splice(idx, 1);
+  localStorage.setItem('bs_results', JSON.stringify(results));
+  renderResults();
+}
+
+function clearResults() {
+  if (!confirm(lang==='ar'?'هل أنت متأكد؟':'Are you sure?')) return;
+  results = []; localStorage.removeItem('bs_results'); renderResults();
+}
+
+// ══════════════════════════════════════════════
+// LAYOUT EDITOR
+// ══════════════════════════════════════════════
+function renderLayoutList() {
+  const container = document.getElementById('layout-list');
+  container.innerHTML = '';
+  getLayouts().forEach(l => {
+    const div = document.createElement('div');
+    div.className = 'layout-item' + (l.id === activeLayoutId ? ' selected' : '');
+    div.innerHTML = `
+      <div onclick="selectLayout('${l.id}')">
+        <div class="layout-name">${l.name}</div>
+        <div class="layout-sub">${l.numQ}Q · ${l.choices} choices · ${l.cols} col${l.cols>1?'s':''}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="layout-check">✓</span>
+        ${l.builtin ? '' : `<button class="del-btn" onclick="deleteLayout('${l.id}')">✕</button>`}
+      </div>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function selectLayout(id) {
+  activeLayoutId = id;
+  localStorage.setItem('bs_active_layout', id);
+  renderLayoutList();
+  populateLayoutSelect();
+  const lay = getLayout(id);
+  document.getElementById('layout-badge').textContent = lay.name;
+  answerKey = {};
+  localStorage.removeItem('bs_key');
+  buildKeyGrid(lay.numQ, lay.choices);
+  toast(lang==='ar'?'تم اختيار القالب':'Layout selected');
+}
+
+function deleteLayout(id) {
+  let custom = JSON.parse(localStorage.getItem('bs_layouts') || '[]');
+  custom = custom.filter(l => l.id !== id);
+  localStorage.setItem('bs_layouts', JSON.stringify(custom));
+  if (activeLayoutId === id) selectLayout('zipgrade20');
+  renderLayoutList();
+  populateLayoutSelect();
+}
+
+function showNewLayoutForm() { document.getElementById('new-layout-form').style.display = ''; }
+function cancelNewLayout() { document.getElementById('new-layout-form').style.display = 'none'; }
+
+function saveNewLayout() {
+  const name = document.getElementById('nl-name').value.trim();
+  if (!name) { toast(lang==='ar'?'أدخل اسم القالب':'Enter layout name', true); return; }
+  const layout = {
+    id: 'custom_' + Date.now(),
+    name,
+    builtin: false,
+    numQ: parseInt(document.getElementById('nl-questions').value) || 20,
+    choices: parseInt(document.getElementById('nl-choices').value),
+    cols: parseInt(document.getElementById('nl-cols').value),
+    top: parseFloat(document.getElementById('nl-top').value),
+    bot: parseFloat(document.getElementById('nl-bot').value),
+    col1: [parseFloat(document.getElementById('nl-c1l').value), parseFloat(document.getElementById('nl-c1r').value)],
+    col2: [parseFloat(document.getElementById('nl-c2l').value), parseFloat(document.getElementById('nl-c2r').value)]
+  };
+  let custom = JSON.parse(localStorage.getItem('bs_layouts') || '[]');
+  custom.push(layout);
+  localStorage.setItem('bs_layouts', JSON.stringify(custom));
+  cancelNewLayout();
+  renderLayoutList();
+  populateLayoutSelect();
+  toast(lang==='ar'?'تم حفظ القالب':'Layout saved');
+}
+
+// ══════════════════════════════════════════════
+// TOAST
+// ══════════════════════════════════════════════
+function toast(msg, isErr = false) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = (isErr ? 'err ' : '') + 'show';
+  clearTimeout(el._t);
+  el._t = setTimeout(() => { el.className = isErr ? 'err' : ''; }, 3000);
+}
+
+// ══════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.en').forEach(e => e.style.display = 'none');
+  populateLayoutSelect();
+  const lay = getLayout(activeLayoutId);
+  document.getElementById('layout-badge').textContent = lay.name;
+  buildKeyGrid(lay.numQ, lay.choices);
+});
+</script>
+</body>
+</html>
