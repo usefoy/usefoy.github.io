@@ -352,8 +352,7 @@ function refresh(){
   const src = $('source').value.trim();
   const srcEl = $('sourceOut');
   if(src){ srcEl.textContent = 'المصدر: ' + src; srcEl.style.display = 'block'; }
-  else { srcEl.style.display = 'none'; } // <--- FIXED: Changed from subEl to srcEl
-
+  else { srcEl.style.display = 'none'; } // --- FIXED SUBTITLE INSTEAD OF SOURCE ISSUE ---
 
   autoFit();
 }
@@ -362,7 +361,7 @@ function refresh(){
 });
 
 $('mediaInput').addEventListener('change', e=>{
-  const file = e.target.files[0];
+  const file = e.target.files[0]; // --- GRABS BASE POINTER SAFE ---
   const box = $('media');
   const body = $('body');
   if(!file){
@@ -418,17 +417,33 @@ document.getElementById('dl').addEventListener('click', async ()=>{
   const originalTransform = card.style.transform;
   card.style.transform = 'none';
 
-  // --- iOS FIXED ARABIC LAYOUT PATCH START ---
+  // ===================================================
+  // PATCH 1: iOS ARABIC LINE BREAKS PRESERVATION
+  // ===================================================
   const contentEl = $('contentOut');
   const originalContentHTML = contentEl.innerHTML;
   const originalContentText = contentEl.textContent;
   
-  // Transform newlines into independent structural block flows to preserve shaping
   const contentLines = originalContentText.split('\n');
   contentEl.innerHTML = contentLines
-    .map(line => `<span class="arabic-line-block">${line.trim() === '' ? '&nbsp;' : line}</span>`)
+    .map(line => {
+      const cleanLine = line.trim() === '' ? '&nbsp;' : line;
+      return `<span style="display: block !important; min-height: 1.5em; white-space: normal !important; direction: rtl; text-align: right;">${cleanLine}</span>`;
+    })
     .join('');
-  // --- iOS FIXED ARABIC LAYOUT PATCH END ---
+
+  // ===================================================
+  // PATCH 2: FIX iOS IMAGE DISTORTION (BYPASSING OBJECT-FIT)
+  // ===================================================
+  const mediaBox = $('media');
+  const originalMediaHTML = mediaBox.innerHTML;
+  const imgEl = mediaBox.querySelector('img');
+  
+  if (mediaKind === 'image' && imgEl) {
+    const imgSrc = imgEl.getAttribute('src');
+    // Hide original image element and substitute with background layout wrapper html2canvas can read
+    mediaBox.innerHTML = `<div id="iosMediaPatch" style="width: 100%; height: 100%; background-image: url('${imgSrc}'); background-size: cover; background-position: center; background-repeat: no-repeat;"></div>`;
+  }
 
   await prepForCapture();
 
@@ -441,8 +456,11 @@ document.getElementById('dl').addEventListener('click', async ()=>{
     card.style.transform = originalTransform;
     restoreAfterCapture();
     
-    // Restore original text flow structure so browser mechanics work normally
+    // ===================================================
+    // RESTORATION: Revert text & media HTML blocks back immediately
+    // ===================================================
     contentEl.innerHTML = originalContentHTML;
+    mediaBox.innerHTML = originalMediaHTML;
 
     canvas.toBlob(function(blob){
       if(!blob){
@@ -470,7 +488,7 @@ document.getElementById('dl').addEventListener('click', async ()=>{
         );
         status.textContent = 'فُتحت الصورة في نافذة جديدة — اضغط مطولاً واحفظها';
       } else {
-        status.textContent = 'تم إنشاء الصورة — إن لم يبدأ التحميل، اسمح بالنوافذ المنبثقة';
+        status.textContent = 'تم إنشاء الصورة — إن لم بدأ التحميل، اسمح بالنوافذ المنبثقة';
       }
       setTimeout(()=>{ status.textContent=''; }, 6000);
     }, 'image/png');
@@ -479,8 +497,9 @@ document.getElementById('dl').addEventListener('click', async ()=>{
     card.style.transform = originalTransform;
     restoreAfterCapture();
     
-    // Restore content element if an unexpected layout engine error happens
+    // Restoration fallbacks on system error layout state 
     contentEl.innerHTML = originalContentHTML;
+    mediaBox.innerHTML = originalMediaHTML;
     
     status.textContent = 'حدث خطأ، حاول مرة أخرى';
     console.error(err);
