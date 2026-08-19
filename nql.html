@@ -223,18 +223,14 @@
   }
   
   .media img, .media video {
-    /* 4. Force fluid constraints in both directions simultaneously */
-    width: auto !important;
-    height: auto !important;
+    /* 3. Force the asset to expand and fill the entire available width and height */
+    width: 100% !important;
+    height: 100% !important;
     
-    /* 5. Restrict maximum layout boundary lines */
-    /* This forces the element to shrink down proportionally if either threshold is hit */
-    max-width: 100% !important;
-    max-height: 100% !important;
-    
-    /* 6. Center the asset vertically if it is shorter than the allowed height box */
-    display: inline-block;
-    vertical-align: middle;
+    /* 4. This forces small images to scale UP and large images to scale DOWN */
+    /* to fit the container perfectly without any squeeze, stretching, or cropping */
+    object-fit: contain !important;
+    display: block;
   }
 
   .footer{
