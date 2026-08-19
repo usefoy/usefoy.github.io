@@ -351,7 +351,7 @@ function refresh(){
   const src = $('source').value.trim();
   const srcEl = $('sourceOut');
   if(src){ srcEl.textContent = 'المصدر: ' + src; srcEl.style.display = 'block'; }
-  else { srcEl.style.display = 'none'; }
+  else { subEl.style.display = 'none'; }
 
 
   autoFit();
@@ -417,13 +417,20 @@ document.getElementById('dl').addEventListener('click', async ()=>{
   const originalTransform = card.style.transform;
   card.style.transform = 'none';
 
+  // --- iOS FIXED ARABIC LAYOUT PATCH START ---
+  const contentEl = $('contentOut');
+  const originalContentHTML = contentEl.innerHTML;
+  const originalContentText = contentEl.textContent;
+  
+  // Transform newlines into independent structural block flows to preserve shaping
+  const contentLines = originalContentText.split('\n');
+  contentEl.innerHTML = contentLines
+    .map(line => `<span class="arabic-line-block">${line.trim() === '' ? '&nbsp;' : line}</span>`)
+    .join('');
+  // --- iOS FIXED ARABIC LAYOUT PATCH END ---
+
   await prepForCapture();
 
-  // Make sure the Arabic webfonts are fully loaded (and painted at least one
-  // frame) before html2canvas snapshots the DOM. On iOS Safari / Firefox the
-  // capture can otherwise race font loading, or fall back to per-character
-  // glyph drawing, both of which show up as disjointed/disconnected Arabic
-  // letterforms even though the live page looks correct.
   if (document.fonts && document.fonts.ready) {
     try { await document.fonts.ready; } catch (e) {}
   }
@@ -432,6 +439,9 @@ document.getElementById('dl').addEventListener('click', async ()=>{
   html2canvas(card, {scale:1, backgroundColor:null, width:1080, height:1920, useCORS:true, allowTaint:true, letterRendering:false}).then(canvas=>{
     card.style.transform = originalTransform;
     restoreAfterCapture();
+    
+    // Restore original text flow structure so browser mechanics work normally
+    contentEl.innerHTML = originalContentHTML;
 
     canvas.toBlob(function(blob){
       if(!blob){
@@ -467,6 +477,10 @@ document.getElementById('dl').addEventListener('click', async ()=>{
   }).catch(err=>{
     card.style.transform = originalTransform;
     restoreAfterCapture();
+    
+    // Restore content element if an unexpected layout engine error happens
+    contentEl.innerHTML = originalContentHTML;
+    
     status.textContent = 'حدث خطأ، حاول مرة أخرى';
     console.error(err);
   });
@@ -475,6 +489,7 @@ document.getElementById('dl').addEventListener('click', async ()=>{
 refresh();
 fitCard();
 </script>
+
 
 </body>
 </html>
