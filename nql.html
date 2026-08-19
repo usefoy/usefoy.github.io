@@ -212,14 +212,15 @@
   }
   .body.has-media .media{
     display:flex;
+    flex: 0 0 50%;
     align-items:center;
     justify-content:center;
     min-height:0;
   }
   .media img, .media video{
-    width: auto;
-    height: auto;
-    object-fit: cover;
+    width:100%;
+    height:100%;
+    object-fit:contain;
     display:block;
   }
 
