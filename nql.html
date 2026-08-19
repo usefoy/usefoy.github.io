@@ -203,43 +203,47 @@
 }
 
   .media {
-    width: 100%;
-    display: none;
-    margin-top: 30px;
-  }
+  width: 100%;
+  display: none;
+  margin-top: 30px;
+}
+
+.body.has-media .media {
+  /* 1. Force standard block mode so iOS does not trigger flex/grid squishing */
+  display: block !important; 
+  width: 100%;
   
-  .body.has-media .media {
-    /* 1. Change from flex to block to prevent iOS canvas collapse bugs */
-    display: block; 
-    width: 100%;
-    
-    /* 2. Define the maximum allowable vertical room using percentage metrics */
-    /* This prevents the block from overflowing its available space */
-    height: 50%; 
-    max-height: 50%; 
-    
-    /* 3. Center the image horizontally inside the block box model framework */
-    text-align: center; 
-  }
+  /* 2. Lock the absolute maximum vertical container limits to 50% */
+  height: 50% !important;
+  max-height: 50% !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* 3. The iOS Failsafe Trick: Create a structural container layout */
+.media img, .media video {
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important; /* Perfectly centers the asset */
   
-  .media img, .media video {
-  /* Force the element to fill the available width smoothly */
-  width: 100% !important;
+  /* 4. Force iOS to prioritize original image dimensions over container bounds */
+  width: auto !important;
+  height: auto !important;
   
-  /* CRITICAL FOR iOS: Remove height 100% completely */
-  /* This tells iOS to compute the height naturally based on the image's original proportions */
-  height: auto !important; 
-  
-  /* Protect against overflows if the image turns out to be extremely tall/vertical */
+  /* 5. Set maximum boundaries so it scales DOWN smoothly if it hits the limit */
+  max-width: 100% !important;
   max-height: 100% !important;
   
-  /* Use containment math to scale small images UP and large images DOWN flawlessly */
-  object-fit: contain !important; 
+  /* 6. Set minimum dimensions to force small images to scale UP to fill the space */
+  min-width: 100%;
+  min-height: 100%;
   
-  /* Center the image horizontally inside the block layout container */
-  margin: 0 auto;
+  /* 7. Preserves perfect aspect ratios across all iOS Safari engines */
+  object-fit: contain !important; 
   display: block;
 }
+
 
   .footer{
     width:100%;
