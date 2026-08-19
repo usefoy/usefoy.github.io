@@ -352,7 +352,8 @@ function refresh(){
   const src = $('source').value.trim();
   const srcEl = $('sourceOut');
   if(src){ srcEl.textContent = 'المصدر: ' + src; srcEl.style.display = 'block'; }
-  else { srcEl.style.display = 'none'; } // --- FIXED: TARGETS SOURCE INSTEAD OF SUBTITLE ---
+  else { srcEl.style.display = 'none'; } // <--- FIXED: Changed from subEl to srcEl
+
 
   autoFit();
 }
@@ -361,7 +362,7 @@ function refresh(){
 });
 
 $('mediaInput').addEventListener('change', e=>{
-  const file = e.target.files[0]; // --- FIXED: RETRIEVES BASE FILE INDEX ---
+  const file = e.target.files[0];
   const box = $('media');
   const body = $('body');
   if(!file){
@@ -417,77 +418,17 @@ document.getElementById('dl').addEventListener('click', async ()=>{
   const originalTransform = card.style.transform;
   card.style.transform = 'none';
 
-  // ==========================================
-  // PATCH 1: iOS ARABIC LINE BREAKS PRESERVATION
-  // ==========================================
+  // --- iOS FIXED ARABIC LAYOUT PATCH START ---
   const contentEl = $('contentOut');
   const originalContentHTML = contentEl.innerHTML;
   const originalContentText = contentEl.textContent;
   
+  // Transform newlines into independent structural block flows to preserve shaping
   const contentLines = originalContentText.split('\n');
   contentEl.innerHTML = contentLines
-    .map(line => {
-      const cleanLine = line.trim() === '' ? '&nbsp;' : line;
-      return `<span style="display: block !important; min-height: 1.5em; white-space: normal !important; direction: rtl; text-align: right;">${cleanLine}</span>`;
-    })
+    .map(line => `<span class="arabic-line-block">${line.trim() === '' ? '&nbsp;' : line}</span>`)
     .join('');
-
-  // ==========================================
-  // PATCH 2: FAILSAFE iOS OBJECT-FIT COVER EMULATION
-  // ==========================================
-  const mediaBox = $('media');
-  const originalMediaHTML = mediaBox.innerHTML;
-  const imgEl = mediaBox.querySelector('img');
-  
-  // Save original style declarations to restore after canvas is drawn
-  const originalMediaStyleDisplay = mediaBox.style.display;
-  const originalMediaStylePosition = mediaBox.style.position;
-
-  if (mediaKind === 'image' && imgEl) {
-    // 1. Force the parent block to isolate completely from iOS Flex layout boundaries
-    mediaBox.style.display = 'block';
-    mediaBox.style.position = 'relative';
-
-    // 2. Fetch runtime structural metrics
-    const containerWidth = mediaBox.clientWidth || 1080;
-    const containerHeight = mediaBox.clientHeight || 600; // Uses design baseline target height
-    const imgNaturalWidth = imgEl.naturalWidth;
-    const imgNaturalHeight = imgEl.naturalHeight;
-
-    // 3. Compute real mathematical coverage dimensions manually (Object-Fit math rules)
-    const containerRatio = containerWidth / containerHeight;
-    const imgRatio = imgNaturalWidth / imgNaturalHeight;
-
-    let renderWidth, renderHeight, renderLeft, renderTop;
-
-    if (imgRatio > containerRatio) {
-      // Image is wider than container box
-      renderHeight = containerHeight;
-      renderWidth = imgNaturalWidth * (containerHeight / imgNaturalHeight);
-      renderTop = 0;
-      renderLeft = (containerWidth - renderWidth) / 2;
-    } else {
-      // Image is taller than container box
-      renderWidth = containerWidth;
-      renderHeight = imgNaturalHeight * (containerWidth / imgNaturalWidth);
-      renderLeft = 0;
-      renderTop = (containerHeight - renderHeight) / 2;
-    }
-
-    // 4. Inject perfectly flattened absolute coordinates html2canvas can read flawlessly on iOS
-    mediaBox.innerHTML = `<img src="${imgEl.src}" style="
-      position: absolute !important;
-      width: ${renderWidth}px !important;
-      height: ${renderHeight}px !important;
-      left: ${renderLeft}px !important;
-      top: ${renderTop}px !important;
-      margin: 0 !important;
-      padding: 0 !important;
-      transform: none !important;
-      max-width: none !important;
-      max-height: none !important;
-    ">`;
-  }
+  // --- iOS FIXED ARABIC LAYOUT PATCH END ---
 
   await prepForCapture();
 
@@ -500,13 +441,8 @@ document.getElementById('dl').addEventListener('click', async ()=>{
     card.style.transform = originalTransform;
     restoreAfterCapture();
     
-    // ==========================================
-    // RESTORATION: Instantly wipe out clones & recover original elements
-    // ==========================================
+    // Restore original text flow structure so browser mechanics work normally
     contentEl.innerHTML = originalContentHTML;
-    mediaBox.innerHTML = originalMediaHTML;
-    mediaBox.style.display = originalMediaStyleDisplay;
-    mediaBox.style.position = originalMediaStylePosition;
 
     canvas.toBlob(function(blob){
       if(!blob){
@@ -543,11 +479,8 @@ document.getElementById('dl').addEventListener('click', async ()=>{
     card.style.transform = originalTransform;
     restoreAfterCapture();
     
-    // Restoration fallback error protection handler bounds
+    // Restore content element if an unexpected layout engine error happens
     contentEl.innerHTML = originalContentHTML;
-    mediaBox.innerHTML = originalMediaHTML;
-    mediaBox.style.display = originalMediaStyleDisplay;
-    mediaBox.style.position = originalMediaStylePosition;
     
     status.textContent = 'حدث خطأ، حاول مرة أخرى';
     console.error(err);
@@ -557,8 +490,5 @@ document.getElementById('dl').addEventListener('click', async ()=>{
 refresh();
 fitCard();
 </script>
-
-
-
 </body>
 </html>
