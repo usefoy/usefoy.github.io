@@ -149,7 +149,7 @@
   }
   .body.no-media{
     justify-content:center;
-    padding-bottom:180px;
+    transform:translateY(-180px);
   }
 
   .text-block{
@@ -183,8 +183,10 @@
     font-size:56px;
     color:var(--ink);
     line-height:1.5;
-    white-space:normal;
-    word-wrap:break-word;
+    white-space:pre-wrap;
+    overflow-wrap:break-word;
+    word-break:normal;
+    direction:rtl;
   }
 
   .media{
