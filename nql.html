@@ -223,15 +223,23 @@
   }
   
   .media img, .media video {
-    /* 3. Force the asset to expand and fill the entire available width and height */
-    width: 100% !important;
-    height: 100% !important;
-    
-    /* 4. This forces small images to scale UP and large images to scale DOWN */
-    /* to fit the container perfectly without any squeeze, stretching, or cropping */
-    object-fit: contain !important;
-    display: block;
-  }
+  /* Force the element to fill the available width smoothly */
+  width: 100% !important;
+  
+  /* CRITICAL FOR iOS: Remove height 100% completely */
+  /* This tells iOS to compute the height naturally based on the image's original proportions */
+  height: auto !important; 
+  
+  /* Protect against overflows if the image turns out to be extremely tall/vertical */
+  max-height: 100% !important;
+  
+  /* Use containment math to scale small images UP and large images DOWN flawlessly */
+  object-fit: contain !important; 
+  
+  /* Center the image horizontally inside the block layout container */
+  margin: 0 auto;
+  display: block;
+}
 
   .footer{
     width:100%;
