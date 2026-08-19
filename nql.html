@@ -336,7 +336,17 @@ function refresh(){
   if(sub){ subEl.textContent = sub; subEl.style.display = 'block'; }
   else { subEl.style.display = 'none'; }
 
-  $('contentOut').textContent = $('content').value;
+  const contentEl = $('contentOut');
+  const lines = $('content').value.split(/\r?\n/);
+  
+  contentEl.innerHTML = '';
+  
+  lines.forEach((line, index) => {
+    if (index > 0) {
+      contentEl.appendChild(document.createElement('br'));
+    }
+    contentEl.appendChild(document.createTextNode(line));
+  });
 
   const src = $('source').value.trim();
   const srcEl = $('sourceOut');
