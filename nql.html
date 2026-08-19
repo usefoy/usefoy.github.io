@@ -202,7 +202,32 @@
   direction: rtl;
 }
 
- .media{    width:100%;    display:none;    align-items:center;    justify-content:center;    overflow:hidden;    margin-top:30px;  }  .body.has-media .media{    display:flex;    flex:1;    min-height:0;  }  .media img, .media video{    width:100%;    height:100%;    object-fit:contain;    display:block;  }
+ .media {
+    width: 100%;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    margin-top: 30px;
+  }
+  
+  .body.has-media .media {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+  }
+  
+  .media img, .media video {
+    width: 100%;
+    
+    /* --- CHANGED LINES --- */
+    height: auto;          /* Stops the image from squeezing vertically */
+    max-height: 100%;      /* Resizes large images down so they fit perfectly */
+    /* --------------------- */
+    
+    object-fit: contain;
+    display: block;
+  }
 
 
   .footer{
