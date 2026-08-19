@@ -205,29 +205,26 @@
   .media {
   width: 100%;
   display: none;
-  position: relative;
-  overflow: hidden;
   margin-top: 30px;
 }
 
 .body.has-media .media {
-  display: block; /* Changed from flex to block to prevent iOS canvas collapse */
+  /* Change from flex to block to prevent iOS canvas layout bugs */
+  display: block; 
   width: 100%;
-  
-  /* Creates a perfectly proportional block taking exactly 50% height of its width */
-  /* If you want it taller or shorter, adjust this percentage value */
-  padding-top: 50%; 
+  height: auto; /* Allow the container height to be completely fluid */
 }
 
 .media img, .media video {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100% !important;
-  height: 100% !important;
-  object-fit: contain;
+  /* CRITICAL: Remove height: 100% and force auto */
+  height: auto !important; 
+  
+  /* Remove object-fit because the image will now naturally preserve its aspect ratio */
+  object-fit: fill; 
   display: block;
 }
+
 
   .footer{
     width:100%;
