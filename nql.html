@@ -202,27 +202,32 @@
   direction: rtl;
 }
 
-  .media{
-    width:100%;
-    display:none;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    margin-top:30px;
-  }
-  .body.has-media .media{
-    display:flex;
-    flex: 0 0 50%;
-    align-items:center;
-    justify-content:center;
-    min-height:0;
-  }
-  .media img, .media video{
-    width:100%;
-    height:100%;
-    object-fit:contain;
-    display:block;
-  }
+  .media {
+  width: 100%;
+  display: none;
+  position: relative;
+  overflow: hidden;
+  margin-top: 30px;
+}
+
+.body.has-media .media {
+  display: block; /* Changed from flex to block to prevent iOS canvas collapse */
+  width: 100%;
+  
+  /* Creates a perfectly proportional block taking exactly 50% height of its width */
+  /* If you want it taller or shorter, adjust this percentage value */
+  padding-top: 50%; 
+}
+
+.media img, .media video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain;
+  display: block;
+}
 
   .footer{
     width:100%;
